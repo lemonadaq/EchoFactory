@@ -1,6 +1,6 @@
 # Echo Factory — stan projektu i wspólna lista prac
 
-Ostatnia aktualizacja: **9 września 2026**. Baza kodu opisana poniżej: commit [`90199a5`](https://github.com/lemonadaq/EchoFactory/commit/90199a529689ae2cd4b8a3fb1b51487f82a0ce2f), gałąź `main`.
+Ostatnia aktualizacja: **9 września 2026**. Baza pierwszego prototypu: commit [`90199a5`](https://github.com/lemonadaq/EchoFactory/commit/90199a529689ae2cd4b8a3fb1b51487f82a0ce2f), gałąź `main`.
 
 **Jesteśmy na etapie pierwszego prototypu Unity. Rdzeń C# przeszedł testy; projekt nie został jeszcze uruchomiony w edytorze Unity.** Najbliższy cel to otworzyć halę, sprawdzić pełną pętlę i naprawić problemy z pierwszej sesji. Nie traktujemy istniejącego kodu interfejsu i zapisu jako potwierdzonego działania w Unity.
 
@@ -13,7 +13,7 @@ Ten plik jest punktem startowym dla Filipa i kolejnych sesji pracy z asystentem.
 - Główna scena: `Assets/EchoFactory/Scenes/Factory.unity`.
 - Otwarcie sceny: **Echo Factory → Otwórz halę**, następnie **Play**.
 - Testy logiki w edytorze: **Echo Factory → Uruchom testy logiki**; wynik w Console.
-- Wynik już wykonanych testów poza Unity: **2079 asercji, 1000 deterministycznych powtórek**.
+- Wynik najnowszych testów poza Unity: **2125 asercji, 1000 deterministycznych powtórek** (druga sesja; szczegóły w VALIDATION).
 - Najbliższe zadanie: **U01 — instalacja i pierwszy import w Unity**.
 - Przygotowany wcześniej prototyp przeglądarkowy jest materiałem porównawczym. Dalszy rozwój prowadzimy w tym projekcie C#.
 
@@ -66,7 +66,7 @@ Dokumenty pomocnicze: [uruchomienie i sterowanie](../README.md), [reguły projek
 
 ## Najbliższe zadania
 
-Proponowany podział: Filip uruchamia Unity i przekazuje obserwacje; asystent przygotowuje poprawki kodu i testy; decyzje o rozgrywce podejmujemy wspólnie. Właściciela można zmienić przy rozpoczęciu zadania. Wszystkie zadania poniżej są obecnie **do zrobienia**.
+Proponowany podział: Filip uruchamia Unity i przekazuje obserwacje; asystent przygotowuje poprawki kodu i testy; decyzje o rozgrywce podejmujemy wspólnie. Właściciela można zmienić przy rozpoczęciu zadania. U01–U09 pozostają **do zrobienia**. Dla U10 wykonano opisany poniżej zakres testów Core; dalsze przypadki będą wynikać z sesji w Unity.
 
 | ID | Priorytet | Zadanie | Proponowany wykonawca | Warunek ukończenia |
 | --- | --- | --- | --- | --- |
@@ -79,9 +79,16 @@ Proponowany podział: Filip uruchamia Unity i przekazuje obserwacje; asystent pr
 | U07 | Następne | Poprawić największe problemy sterowania i czytelności z pierwszej sesji. | Asystent + Filip | Każdy zgłoszony problem ma poprawkę i ponowny test. |
 | U08 | Następne | Zbudować i uruchomić prototyp Windows poza edytorem. | Filip / środowisko z Unity | Aplikacja startuje, realizuje cykl i zachowuje zapis. |
 | U09 | Po pierwszej sesji | Sprawdzić ekonomię, pojemności i tempo; poprawić balans. | Wspólnie | Zakupy rozwiązują zauważalne problemy; podstawowa linia nie wymaga czekania offline. |
-| U10 | Po pierwszej sesji | Dodać kolejne testy dla wykrytych ryzyk, np. ilości >1 i dłuższych kolejek. | Asystent | Test pokazuje konkretny problem i przechodzi po poprawce. |
+| U10 | Wykonano zakres Core | Dodano testy partii 2–3 szt., kolejki trzech Echo, niewykonalnego żądania, współpracy dostawcy z odbiorcą i podglądu ustawienia budynku. | Asystent | 2125 asercji przeszło. Nowe problemy z Unity nadal wymagają osobnych przypadków. |
 
 **Bramka przejścia dalej:** hala uruchamia się w Unity; da się ręcznie produkować, zapisać Echo i uzyskać współpracę dostawcy z odbiorcą; magazyny i rozliczenia działają; nie ma znanego błędu utraty postępu. Wynik musi pochodzić z testu, nie z samej obecności kodu.
+
+## Postęp drugiej sesji — 9 września 2026
+
+- Dodano ostrzeżenie przed ustawieniem budynku na nagranej trasie i przed zmianą punktu obsługi Echo. Podgląd wskazuje numery nagrań i poprawność pola; nie wydaje Credits.
+- Kliknięcie dotychczasowej pozycji budynku nie kasuje certyfikatu ani nie zajmuje historii cofania.
+- Zrealizowano zakres U10 opisany w tabeli. Testy potwierdzają również dwie współpracujące role Echo z transportem partii.
+- Nie zmieniono ekonomii, reguł oczekiwania ani zapisanych tras. UI podglądu wymaga pierwszego testu w Unity.
 
 ## Kolejne etapy po działającej hali
 
@@ -116,7 +123,7 @@ Pełny plan zakłada do sześciu sektorów, z wariantem ograniczonym do czterech
 | --- | --- | --- | --- |
 | O01 | Brak weryfikacji | Projekt nie został uruchomiony w Unity. Nie znamy jeszcze błędów importu ani widoku. | U01–U05. |
 | O02 | Ograniczenie | IMGUI i schematyczna plansza są tymczasowe; brak docelowego UI i grafiki. | Najpierw używalność, później oprawa. |
-| O03 | Ograniczenie | Licznik zależnych nagrań uwzględnia wskazania stacji, nie wszystkie trasy przez nowe przeszkody. | Analiza tras i ostrzeżenie przed zmianą układu. |
+| O03 | Zaimplementowane, UI do testu | Podgląd analizuje trasy przez nowe pole i odwołania do przenoszonej stacji; podaje ID także wyłączonych Echo. Logika sprawdzona w Core. | Sprawdzić kolory i czytelność w Unity. Skutki pośrednie dla kolejek nadal ocenia test autonomii. |
 | O04 | Ograniczenie | Certyfikat tylko w pamięci; po ponownym uruchomieniu potrzebny test. | Trwały certyfikat związany z danymi i wersją reguł. |
 | O05 | Ograniczenie | Jeden slot obsługi, brak dróg, obracania i usuwania budynków. | Zakres rozszerzać po osobnej decyzji. |
 | O06 | Ograniczenie | Dziennik zastępuje timeline; brak grafu przyczyn błędów. | Etap diagnozy. |
@@ -158,6 +165,7 @@ Wynik ponownego testu i data:
 | 09.09.2026 | Testy rdzenia poza Unity. | 2079 asercji i 1000 powtórek przeszło; szczegóły w VALIDATION. |
 | 09.09.2026 | Rozwiązanie problemu dostępu GitHub i wysłanie projektu. | Kod na `main`, commit `90199a5`. |
 | 09.09.2026 | Dodanie wspólnego pliku statusu. | Następny krok: U01, pierwszy import Unity. |
+| 09.09.2026 | Podgląd wpływu budynków na Echo i rozszerzenie testów Core (U10 / O03). | 2125 asercji przeszło; ostrzeżenia UI do testu w Unity. |
 
 **Na następną sesję:** sprawdzić U01. Jeśli Unity nadal nie jest dostępne, można pracować nad konkretnymi testami Core, ale weryfikacja sceny pozostaje otwarta. Jeśli import już wykonano, zacząć od komunikatów Console i wyniku uruchomienia hali.
 

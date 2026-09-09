@@ -102,21 +102,53 @@ namespace EchoFactory.Core
             var state = undo.Pop(); Data.Layout = state.Layout; Data.Credits = state.Credits; Changed(); return true;
         }
         public int Dependents(int id) { return Data.Echoes.Count(e => e.Commands.Any(c => c.TargetId == id)); }
-        public bool Place(int id, Cell position, StationKind kind = StationKind.Buffer, Material material = Material.Plate)
+        // Preview and commit share validation; preview never spends Credits or changes recordings.
+        public bool PreviewPlacement(int id, Cell position, out string reason, out List<int> affected,
+            StationKind kind = StationKind.Buffer, Material material = Material.Plate)
         {
-            if (Phase != GamePhase.Planning) return Reject("Budowanie jest dostępne podczas planowania.");
-            var layout = Data.Layout.Copy(); var s = layout.Stations.Find(x => x.Id == id); int cost = 0;
-            if (id != 0 && s == null) return Reject("Nie znaleziono stacji.");
+            Layout proposed; int cost;
+            bool valid = PreparePlacement(id, position, kind, material, out proposed, out cost, out reason);
+            affected = new List<int>();
+            if (!valid) return false;
+            var old = Data.Layout.Stations.Find(s => s.Id == id);
+            if (old != null && old.Position == position) { reason = "Budynek jest już na tym polu."; return true; }
+            // Include disabled recordings, since enabling them later must not hide broken routes.
+            affected = Data.Echoes.Where(e => e.Commands.Any(c =>
+                (id != 0 && c.TargetId == id && c.Kind != CommandKind.Move) ||
+                (c.Kind == CommandKind.Move && c.Path.Contains(position))))
+                .OrderBy(e => e.Id).Select(e => e.Id).ToList();
+            reason = affected.Count == 0 ? "Brak bezpośrednich kolizji z nagraniami. Po zmianie sprawdź autonomię."
+                : "Sprawdź nagrania Echo: " + string.Join(", ", affected.Select(x => "#" + x)) +
+                  ". Zmienia się cel obsługi lub budynek przecina zapisaną trasę.";
+            return true;
+        }
+        private bool PreparePlacement(int id, Cell position, StationKind kind, Material material,
+            out Layout layout, out int cost, out string reason)
+        {
+            layout = null; cost = 0; reason = "Budowanie jest dostępne podczas planowania.";
+            if (Phase != GamePhase.Planning) return false;
+            layout = Data.Layout.Copy(); var s = layout.Stations.Find(x => x.Id == id);
+            if (id != 0 && s == null) { reason = "Nie znaleziono stacji."; return false; }
             if (s == null)
             {
-                if (kind != StationKind.Buffer && kind != StationKind.Press) return Reject("Możesz dobudować prasę lub bufor.");
+                if (kind != StationKind.Buffer && kind != StationKind.Press) { reason = "Możesz dobudować prasę lub bufor."; return false; }
                 cost = kind == StationKind.Press ? 120 : 40;
-                if (Data.Credits < cost) return Reject("Brak Credits.");
+                if (Data.Credits < cost) { reason = "Brak Credits."; return false; }
                 s = new StationSpec { Id = layout.NextStationId++, Kind = kind, BufferMaterial = material }; layout.Stations.Add(s);
             }
-            s.Position = position; string why;
-            if (!layout.Valid(out why)) return Reject(why);
-            Remember(); Data.Layout = layout; Data.Credits -= cost; Changed(); Message = "Układ zmieniony. Stare trasy nie są automatycznie przeliczane."; return true;
+            s.Position = position;
+            return layout.Valid(out reason);
+        }
+        public bool Place(int id, Cell position, StationKind kind = StationKind.Buffer, Material material = Material.Plate)
+        {
+            string why; List<int> affected;
+            if (!PreviewPlacement(id, position, out why, out affected, kind, material)) return Reject(why);
+            var old = Data.Layout.Stations.Find(s => s.Id == id);
+            if (old != null && old.Position == position) { Message = why; return true; }
+            Layout layout; int cost; string validation;
+            if (!PreparePlacement(id, position, kind, material, out layout, out cost, out validation)) return Reject(validation);
+            Remember(); Data.Layout = layout; Data.Credits -= cost; Changed();
+            Message = "Układ zmieniony. " + why; return true;
         }
         public int UpgradeCost(int id, UpgradeKind kind)
         {

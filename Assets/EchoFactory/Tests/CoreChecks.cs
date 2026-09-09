@@ -14,7 +14,7 @@ namespace EchoFactory.Tests
             string reason; Check(sim.EnqueueAction(id, kind, material, quantity, out reason), "enqueue: " + reason);
             int before = sim.Operator.Errors;
             while (!sim.Operator.Idle && !sim.Finished) sim.Step();
-            Check(sim.Operator.Errors == before, "operator action failed");
+            Check(sim.Operator.Errors == before, "operator action failed at station " + id + " (" + kind + ", quantity " + quantity + "): " + sim.Operator.Status);
         }
         private static Recording Record(Simulation sim, int id = 1)
         {
@@ -26,6 +26,82 @@ namespace EchoFactory.Tests
             Action(sim, 2, CommandKind.Deposit, Material.Ore);
             Action(sim, 2, CommandKind.Pickup, Material.Plate);
             Action(sim, 3, CommandKind.Deposit, Material.Plate);
+        }
+        private static void PlacementChecks(Recording echo)
+        {
+            string why; List<int> affected;
+            var campaign = new Campaign(); campaign.Echoes.Add(echo.Copy()); campaign.NextEchoId = 2;
+            var game = new GameSession(campaign);
+            Check(game.Verify().Passed, "preview setup certified"); var certificate = game.Certificate;
+            int credits = game.Data.Credits, nextId = game.Data.Layout.NextStationId;
+            var obstacle = new Cell(3, 4); // Recorded feeder -> press path, not a station or port.
+            Check(echo.Commands.Any(c => c.Kind == CommandKind.Move && c.Path.Contains(obstacle)), "test obstacle crosses recorded path");
+            Check(game.PreviewPlacement(0, obstacle, out why, out affected) && affected.SequenceEqual(new[] { 1 }), "new building detects route-only dependency");
+            Check(game.Data.Credits == credits && game.Data.Layout.NextStationId == nextId && game.Data.Layout.Stations.Count == 3 && game.Certificate == certificate, "preview is read-only");
+            Check(!game.Undo(), "preview does not add undo entry");
+            Check(!game.PreviewPlacement(0, Rules.Spawn, out why, out affected) && affected.Count == 0, "invalid placement preview rejected");
+            Check(!game.Place(0, Rules.Spawn) && game.Data.Credits == credits && game.Certificate == certificate, "invalid placement leaves state unchanged");
+            Check(game.Place(2, game.Data.Layout.Stations[1].Position) && game.Certificate == certificate && !game.Undo(), "unchanged position is a no-op");
+            Check(game.PreviewPlacement(2, new Cell(8, 5), out why, out affected) && affected.SequenceEqual(new[] { 1 }), "moved service target detected once");
+            Check(game.PreviewPlacement(0, new Cell(12, 6), out why, out affected) && affected.Count == 0, "unrelated building does not warn about route");
+            Check(game.Place(0, obstacle) && game.Data.Credits == credits - 40 && game.Certificate == null, "placement commits cost and invalidates certificate");
+            Check(!game.Verify().Passed, "predicted obstacle breaks replay");
+            Check(game.Undo() && game.Data.Credits == credits && game.Verify().Passed, "undo restores route and credits");
+            Check(game.ToggleEcho(1), "disable recording for preview");
+            Check(game.PreviewPlacement(0, obstacle, out why, out affected) && affected.SequenceEqual(new[] { 1 }), "disabled recordings included in warning");
+            Check(game.Start() && !game.PreviewPlacement(0, obstacle, out why, out affected), "preview refuses changes during shift");
+        }
+        private static Recording PickupRequest(int id, int tick, int quantity, int timeout = 120)
+        {
+            return new Recording { Id = id, Profile = new OperatorProfile { Cargo = 4 }, Commands = new List<Command> {
+                new Command { Tick = tick, Kind = CommandKind.Pickup, TargetId = 4, Material = Material.Ore, Quantity = quantity, TimeoutTicks = timeout }
+            } };
+        }
+        private static void BatchAndQueueChecks()
+        {
+            var layout = Layout.Default(); layout.Operator.Cargo = 4;
+            layout.Stations.Add(new StationSpec { Id = 4, Kind = StationKind.Buffer, BufferMaterial = Material.Ore, Position = new Cell(4, 6) }); layout.NextStationId = 5;
+            var batch = new Simulation(layout, new Recording[0], true);
+            Action(batch, 1, CommandKind.Pickup, Material.Ore, 3);
+            Action(batch, 4, CommandKind.Deposit, Material.Ore, 3);
+            Check(batch.Station(4).Output == 3 && batch.Operator.CargoCount == 0, "batch deposit conserves material");
+            Action(batch, 4, CommandKind.Pickup, Material.Ore, 2);
+            Check(batch.Station(4).Output == 1 && batch.Operator.CargoCount == 2, "partial batch withdrawal leaves remainder");
+            Action(batch, 2, CommandKind.Deposit, Material.Ore, 2);
+            while (batch.Station(2).Output < 2 && !batch.Finished) batch.Step();
+            Action(batch, 2, CommandKind.Pickup, Material.Plate, 2);
+            Action(batch, 3, CommandKind.Deposit, Material.Plate, 2);
+            Check(batch.Shipped == 2 && batch.Operator.CargoCount == 0 && batch.Station(4).Output == 1, "batch production and dispatch conserve material");
+            var replay = new Simulation(layout, new[] { Record(batch) }, false); replay.RunToEnd();
+            Check(replay.Shipped == 2 && replay.ErrorCount == 0 && !replay.HasUnfinished && replay.Station(4).Output == 1, "batch semantic replay");
+
+            var fifo = new Simulation(layout, new[] { PickupRequest(1, 4, 1), PickupRequest(3, 0, 1), PickupRequest(2, 3, 1) }, false);
+            foreach (var unit in fifo.Units) unit.Position = fifo.Station(4).Spec.Port;
+            fifo.Station(4).Output = 3; fifo.RunToEnd();
+            Check(fifo.Events.Where(e => e.StationId == 4).Select(e => e.UnitId).SequenceEqual(new[] { 3, 2, 1 }), "queue uses arrival before echo age");
+            Check(fifo.Units.All(u => u.CargoCount == 1) && fifo.ErrorCount == 0 && fifo.Station(4).Output == 0, "queue serves each item once");
+
+            var waiting = new Simulation(layout, new[] { PickupRequest(1, 0, 2, 30), PickupRequest(2, 2, 1) }, false);
+            foreach (var unit in waiting.Units) unit.Position = waiting.Station(4).Spec.Port;
+            waiting.Station(4).Output = 1;
+            waiting.Step();
+            Check(waiting.Station(4).ServiceUnit == 0 && waiting.Station(4).Output == 1 && waiting.Units[0].CargoCount == 0, "unavailable batch never takes a partial amount or service lock");
+            waiting.Step();
+            Check(waiting.Station(4).ServiceUnit == 2, "feasible request bypasses unavailable batch");
+            waiting.RunToEnd();
+            Check(waiting.Units[0].Errors == 1 && waiting.Units[0].CargoCount == 0 && waiting.Units[1].CargoCount == 1 && waiting.Station(4).ServiceUnit == 0, "expired batch releases queue without duplicating stock");
+
+            // A supplier recording feeds the press while a second recording delivers its output.
+            var supplier = new Simulation(layout, new Recording[0], true);
+            Action(supplier, 1, CommandKind.Pickup, Material.Ore, 3); Action(supplier, 2, CommandKind.Deposit, Material.Ore, 3);
+            var supplyEcho = Record(supplier);
+            var receiver = new Simulation(layout, new[] { supplyEcho }, true);
+            // Time the receiver after the supplier; two plates need two production cycles.
+            while (receiver.Tick < 200) receiver.Step();
+            Action(receiver, 2, CommandKind.Pickup, Material.Plate, 2); Action(receiver, 3, CommandKind.Deposit, Material.Plate, 2);
+            var receivingEcho = Record(receiver, 2);
+            var game = new GameSession(new Campaign { Layout = layout, Echoes = new List<Recording> { supplyEcho, receivingEcho }, NextEchoId = 3 });
+            Check(game.Verify().Passed && game.Certificate.Plates == 2, "supplier and receiver cooperate autonomously with batches");
         }
         public static string Run()
         {
@@ -91,6 +167,7 @@ namespace EchoFactory.Tests
             var full = new Simulation(layout, new Recording[0], true); Action(full, 1, CommandKind.Pickup, Material.Ore);
             while(full.Tick < 1190) full.Step(); int history = full.Operator.Commands.Count;
             Check(!full.EnqueueAction(3, CommandKind.Deposit, Material.Plate, 1, out why) && full.Operator.Commands.Count == history, "late request does not destroy recording");
+            PlacementChecks(echo); BatchAndQueueChecks();
             return "PASS: " + checks + " assertions; 1000 deterministic replays; buffers, atomic service, conflict, upgrades, placement, autonomy, recording and payouts.";
         }
     }

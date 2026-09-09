@@ -89,10 +89,16 @@ namespace EchoFactory.Runtime
         private void Grid()
         {
             var sim=game.Simulation;Label(GridX,101,800,25,placement>=0?"WSKAŻ NOWE POŁOŻENIE · ESC ANULUJE":"WYBIERZ STACJĘ · AKCJE W PANELU PO PRAWEJ",small,Muted);
+            string placementHint = "";
+            var hover = new Cell(Mathf.FloorToInt((Event.current.mousePosition.x-GridX)/CellSize), Mathf.FloorToInt((Event.current.mousePosition.y-GridY)/CellSize));
+            bool previewValid = false; var affected = new System.Collections.Generic.List<int>();
+            if(placement>=0 && hover.X>=0 && hover.X<Rules.Width && hover.Y>=0 && hover.Y<Rules.Height)
+                previewValid=game.PreviewPlacement(placement,hover,out placementHint,out affected,newKind,newMaterial);
             for(int y=0;y<Rules.Height;y++)for(int x=0;x<Rules.Width;x++)
             {
                 Rect r=new Rect(GridX+x*CellSize,GridY+y*CellSize,CellSize-2,CellSize-2);var cell=new Cell(x,y);
                 Fill(r,(x+y)%2==0?new Color(.13f,.18f,.21f):new Color(.115f,.16f,.19f));if(cell==Rules.Spawn)Label(r.x+4,r.y+35,50,18,"START",small,Muted);
+                if(placement>=0 && cell==hover)Fill(r,!previewValid?new Color(.65f,.22f,.22f):affected.Count>0?new Color(.65f,.48f,.18f):new Color(.22f,.48f,.36f));
                 if(GUI.enabled&&Event.current.type==EventType.MouseDown&&Event.current.button==0&&r.Contains(Event.current.mousePosition))
                 {
                     if(placement>=0) { bool ok=game.Place(placement,cell,newKind,newMaterial);Change(ok);if(ok){selected=placement==0?game.Data.Layout.NextStationId-1:placement;placement=-1;} }
@@ -117,7 +123,7 @@ namespace EchoFactory.Runtime
                 Fill(r,u.IsOperator?Amber:Cyan);Label(r.x+2,r.y+4,38,22,u.IsOperator?"TY":"E"+u.Id,small,Bg);
                 if(u.CargoCount>0)Label(r.x-2,r.y+29,57,22,u.CargoCount+(u.Cargo==Material.Ore?" R":" P"),small,u.IsOperator?Amber:Cyan);
             }
-            Label(24,663,812,32,"R = ruda · P = płyta · żółty: Operator · cyjan: Echo · pasek pod stacją: punkt obsługi",small,Muted);
+            Label(24,663,812,38,placementHint.Length>0?placementHint:"R = ruda · P = płyta · żółty: Operator · cyjan: Echo · pasek pod stacją: punkt obsługi",small,placementHint.Length>0?Amber:Muted);
         }
         private void Controls()
         {
