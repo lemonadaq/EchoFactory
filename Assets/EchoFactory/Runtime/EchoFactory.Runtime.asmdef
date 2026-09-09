@@ -1,0 +1,1 @@
+{"name":"EchoFactory.Runtime","rootNamespace":"EchoFactory.Runtime","references":["EchoFactory.Core"],"autoReferenced":true,"noEngineReferences":false}

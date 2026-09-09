@@ -1,0 +1,1 @@
+{"name":"EchoFactory.Checks","rootNamespace":"EchoFactory.Tests","references":["EchoFactory.Core"],"includePlatforms":["Editor"],"autoReferenced":false,"noEngineReferences":true}

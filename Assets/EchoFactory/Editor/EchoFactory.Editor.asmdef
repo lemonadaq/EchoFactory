@@ -1,0 +1,1 @@
+{"name":"EchoFactory.Editor","rootNamespace":"EchoFactory.Editor","references":["EchoFactory.Core","EchoFactory.Runtime","EchoFactory.Checks"],"includePlatforms":["Editor"],"autoReferenced":true}

@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><EnableDefaultCompileItems>false</EnableDefaultCompileItems><LangVersion>9.0</LangVersion></PropertyGroup>
+  <ItemGroup><Compile Include="../../Assets/EchoFactory/Core/*.cs"/><Compile Include="../../Assets/EchoFactory/Tests/CoreChecks.cs"/><Compile Include="Program.cs"/></ItemGroup>
+</Project>
