@@ -26,6 +26,16 @@ Dodano 46 asercji obejmujących:
 
 Test partii uwzględnia czas na wyprodukowanie obu płyt; nie wydłużono okna komend ani nie zmieniono reguł symulacji. Kod podglądu kolorów i ostrzeżeń w Runtime **nie został skompilowany ani obejrzany w Unity**. Wynik testów dotyczy logiki Core.
 
+## Trzecia sesja — diagnostyka (10 września 2026)
+
+**2139 asercji przeszło** przy tym samym sposobie kompilacji: Roslyn z SDK 8.0.408, C# 9, uruchomienie na .NET 8.0.15 poza Unity. 1000 powtórek porównuje teraz także numer komendy i zapisane pole zdarzenia.
+
+14 nowych asercji sprawdza: brak przedwczesnego zgłoszenia problemu, czas i numer pierwszej błędnej komendy, zachowanie pola zablokowanej trasy po dalszym ruchu, kontekst braku materiału w wyniku autonomii, rozpoznanie niedokończonej czynności na końcu zmiany, pierwszeństwo wcześniejszego błędu oraz brak mutacji zdarzeń i śladu przez odczyt diagnostyki. Pusta hala nadal nie otrzymuje certyfikatu tylko dlatego, że nie ma błędów jednostek.
+
+Opis niedokończonej czynności jest informacją diagnostyczną; nie zwiększa licznika błędów i nie dodaje zdarzenia do symulacji. Nie zmieniono reguł ani schematu zapisu kampanii. Pierwszy zaobserwowany błąd nie jest analizą pełnego łańcucha przyczyn.
+
+Filtr dziennika, ramka pola problemu, przejście do stacji i widok kolejki mają przygotowany kod Runtime. **Nie były kompilowane ani oglądane w Unity.**
+
 ## Jeszcze niewykonane
 
 - Import sceny i ustawień przez Unity.

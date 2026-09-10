@@ -35,7 +35,8 @@ WASD lub strzałki poruszają o jedno pole; **E** wykonuje domyślną akcję wyb
 - Ulepszenia pojemności, czasu produkcji, udźwigu, ruchu i obsługi; cofanie zakupów/układu do startu zmiany.
 - Do 5 aktywnych Echo, nagrywanie, wyłączanie, zastępowanie i jawne zastosowanie nowego profilu.
 - Wspólne zasoby i jedna obsługa naraz przy stacji; przenikanie na trasie.
-- Dziennik błędów, dwa deterministyczne testy autonomii bez Operatora i Autoloop aktywnej hali.
+- Dziennik z pierwszym problemem, kontekstem komendy i filtrem błędów; podgląd oczekiwania przy stacji.
+- Dwa deterministyczne testy autonomii bez Operatora i Autoloop aktywnej hali.
 - Credits wypłacane za pełne zmiany, przerwanie bez częściowej wypłaty, lokalny zapis i kopia poprzedniej generacji.
 
 ## Ważne zasady

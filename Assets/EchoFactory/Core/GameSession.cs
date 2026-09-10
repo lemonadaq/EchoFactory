@@ -9,6 +9,7 @@ namespace EchoFactory.Core
         public bool Passed;
         public int Plates, Errors;
         public ulong Trace;
+        public SimEvent FirstProblem;
         public string Message;
     }
     public sealed class GameSession
@@ -89,9 +90,10 @@ namespace EchoFactory.Core
             if (Phase != GamePhase.Planning || ReplacingId != 0) return new Verification { Message = "Zakończ zmianę lub anuluj zastępowanie." };
             var a = new Simulation(Data.Layout, Data.Echoes, false); a.RunToEnd();
             var b = new Simulation(Data.Layout, Data.Echoes, false); b.RunToEnd();
-            bool sameEvents = a.Events.Count == b.Events.Count && a.Events.Zip(b.Events, (x, y) => x.Tick == y.Tick && x.UnitId == y.UnitId && x.StationId == y.StationId && x.Error == y.Error && x.Message == y.Message).All(x => x);
-            var result = new Verification { Passed = a.Shipped >= 1 && a.ErrorCount == 0 && !a.HasUnfinished && a.Trace == b.Trace && sameEvents, Plates = a.Shipped, Errors = a.ErrorCount, Trace = a.Trace };
+            bool sameEvents = a.Events.Count == b.Events.Count && a.Events.Zip(b.Events, (x, y) => x.Tick == y.Tick && x.UnitId == y.UnitId && x.StationId == y.StationId && x.Error == y.Error && x.Message == y.Message && x.CommandIndex == y.CommandIndex && x.Position == y.Position).All(x => x);
+            var result = new Verification { Passed = a.Shipped >= 1 && a.ErrorCount == 0 && !a.HasUnfinished && a.Trace == b.Trace && sameEvents, Plates = a.Shipped, Errors = a.ErrorCount, Trace = a.Trace, FirstProblem = a.FirstProblem() };
             result.Message = result.Passed ? "Autonomia potwierdzona w dwóch przebiegach." : "Test nieudany: " + a.Shipped + " płyt, " + a.ErrorCount + " błędów" + (a.HasUnfinished ? ", niedokończone akcje." : ".");
+            if (result.FirstProblem != null) result.Message += " " + result.FirstProblem.Context + ": " + result.FirstProblem.Message;
             Certificate = result.Passed ? result : null; Simulation = a; Message = result.Message; return result;
         }
         private void Remember() { undo.Push(new PlanningSnapshot { Layout = Data.Layout.Copy(), Credits = Data.Credits }); }

@@ -15,4 +15,11 @@ Status: do wykonania w edytorze Unity 6000.3.18f1.
 11. Zmień fokus, pauzuj i użyj tempa 0,5×. Po wznowieniu sprawdź brak skoku czasu i podwójnej wypłaty.
 12. Sprawdź dwa pełne cykle Autoloop, wyłącz go przez Przerwij i potwierdź saldo.
 
+## Diagnostyka — dodatkowy test po pierwszym uruchomieniu
+
+1. Z pustej prasy zleć odbiór płyty i poczekaj na upływ okna komendy. W Dzienniku powinien pojawić się pierwszy problem: czas, Operator, numer komendy, stacja #2 i brak materiału. Sprawdź filtr „Tylko błędy” oraz „Przejdź do stacji”.
+2. Zapisz poprawną trasę Echo, następnie postaw budynek na jej polu i sprawdź autonomię. Dziennik ma wyróżniać czerwonym obramowaniem problematyczne pole, także jeżeli Echo później przemieściło się dalej.
+3. W trakcie pracy dwóch Echo wybierz wspólną stację. Panel powinien pokazać jednostkę w obsłudze i oczekujących z aktualnym powodem. Samo czekanie na materiał nie powinno być od razu błędem.
+4. Jeśli zmiana kończy się w trakcie czynności, Dziennik powinien ją opisać nawet przy zerowym liczniku błędów. Brak błędów w pustej hali nie oznacza udanego testu autonomii.
+
 Raport problemu: wersja Unity, kroki, oczekiwany efekt, rzeczywisty efekt, komunikat Console i opcjonalnie screenshot. Nie wysyłaj całego folderu Library/.

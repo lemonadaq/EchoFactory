@@ -27,7 +27,12 @@ namespace EchoFactory.Core
     {
         public int Tick, UnitId, StationId;
         public bool Error;
+        public int CommandIndex = -1;
+        public Cell Position;
         public string Message;
+        public string Actor { get { return UnitId == 0 ? "Produkcja" : UnitId == int.MaxValue ? "Operator" : "Echo #" + UnitId; } }
+        public string Context { get { return Actor + (CommandIndex >= 0 ? " · komenda " + (CommandIndex + 1) : "") +
+            (StationId > 0 ? " · stacja #" + StationId : " · pole " + Position.X + "," + Position.Y); } }
     }
     public sealed class Simulation
     {
@@ -173,7 +178,26 @@ namespace EchoFactory.Core
             u.Errors++; Log(u, u.Current == null ? 0 : u.Current.TargetId, reason, true);
             u.Moving = u.Servicing = false; u.Index++; u.WaitSince = -1; u.Status = "Błąd: " + reason;
         }
-        private void Log(UnitState u, int station, string message, bool error = false) { Events.Add(new SimEvent { Tick = Tick, UnitId = u == null ? 0 : u.Id, StationId = station, Message = message, Error = error }); }
+        private SimEvent Describe(UnitState u, int station, string message, bool error)
+        {
+            var spec = Station(station);
+            var position = u == null ? (spec == null ? Rules.Spawn : spec.Spec.Position) : u.Position;
+            // Keep the failing step, not the unit's later position, for route diagnostics.
+            if (u != null && u.Moving && u.Current != null && u.PathIndex < u.Current.Path.Count)
+                position = u.Current.Path[u.PathIndex];
+            return new SimEvent { Tick = Tick, UnitId = u == null ? 0 : u.Id, StationId = station,
+                CommandIndex = u == null ? -1 : u.Index, Position = position, Message = message, Error = error };
+        }
+        private void Log(UnitState u, int station, string message, bool error = false) { Events.Add(Describe(u, station, message, error)); }
+        public SimEvent FirstProblem()
+        {
+            var first = Events.Find(e => e.Error);
+            if (first != null || !Finished) return first;
+            var pending = Units.Where(u => !u.Idle).OrderBy(u => u.Current.Tick).ThenBy(u => u.Id).FirstOrDefault();
+            return pending == null ? null : Describe(pending, pending.Current.TargetId,
+                "Koniec zmiany przed ukończeniem czynności: " + pending.Status, true);
+        }
+
         private void Mix(int value) { unchecked { Trace ^= (uint)value; Trace *= 1099511628211UL; } }
         private void HashState()
         {

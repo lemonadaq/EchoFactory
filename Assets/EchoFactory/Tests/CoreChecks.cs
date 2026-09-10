@@ -103,6 +103,48 @@ namespace EchoFactory.Tests
             var game = new GameSession(new Campaign { Layout = layout, Echoes = new List<Recording> { supplyEcho, receivingEcho }, NextEchoId = 3 });
             Check(game.Verify().Passed && game.Certificate.Plates == 2, "supplier and receiver cooperate autonomously with batches");
         }
+        private static void DiagnosticChecks()
+        {
+            var layout = Layout.Default();
+            var blocked = new Recording { Id = 1, Commands = new List<Command> {
+                new Command { Kind = CommandKind.Move, Path = new List<Cell> { new Cell(2, 5), new Cell(2, 4), new Cell(2, 3) } },
+                new Command { Tick = 100, Kind = CommandKind.Move, Path = new List<Cell> { new Cell(3, 4) } }
+            } };
+            var sim = new Simulation(layout, new[] { blocked }, false);
+            Check(sim.FirstProblem() == null, "no diagnosis before an actual error"); sim.RunToEnd();
+            var first = sim.FirstProblem();
+            Check(first != null && first.UnitId == 1 && first.CommandIndex == 0 && first.Tick == 31, "diagnosis identifies first failed command and tick");
+            Check(first.Position == new Cell(2, 3) && sim.Units[0].Position == new Cell(3, 4), "diagnosis preserves blocked cell after unit moves away");
+            Check(first.StationId == 0 && first.Context.Contains("komenda 1") && first.Context.Contains("2,3"), "movement diagnosis has cell context and human command numbering");
+            int count = sim.Events.Count; ulong trace = sim.Trace;
+            Check(sim.FirstProblem() == first && sim.Events.Count == count && sim.Trace == trace, "reading diagnostics does not change events or simulation");
+
+            var missing = new Recording { Id = 2, Commands = new List<Command> {
+                new Command { Kind = CommandKind.Move, Path = Pathfinder.Find(layout, Rules.Spawn, layout.Stations[1].Port) },
+                new Command { Tick = 80, Kind = CommandKind.Pickup, TargetId = 2, Material = Material.Plate, TimeoutTicks = 5 }
+            } };
+            var game = new GameSession(new Campaign { Echoes = new List<Recording> { missing }, NextEchoId = 3 });
+            var result = game.Verify(); first = result.FirstProblem;
+            Check(!result.Passed && first != null && first.Tick == 86 && first.StationId == 2 && first.CommandIndex == 1, "verification returns material shortage context");
+            Check(first.Message.Contains("magazynie wyjściowym") && result.Message.Contains(first.Context), "verification explains observed shortage");
+
+            var late = new Recording { Id = 3, Commands = new List<Command> {
+                new Command { Tick = Rules.ShiftTicks - 1, Kind = CommandKind.Move, Path = new List<Cell> { new Cell(2, 5) } }
+            } };
+            var boundary = new Simulation(layout, new[] { late }, false);
+            while (boundary.Tick < Rules.ShiftTicks - 1) boundary.Step();
+            Check(boundary.FirstProblem() == null, "ongoing movement is not prematurely a failure");
+            boundary.RunToEnd(); first = boundary.FirstProblem(); count = boundary.Events.Count;
+            Check(boundary.ErrorCount == 0 && first != null && first.UnitId == 3 && first.Position == new Cell(2, 5), "unfinished shift diagnosed even without error event");
+            Check(first.Message.Contains("Koniec zmiany") && first.Tick == Rules.ShiftTicks, "unfinished diagnosis explains boundary");
+            boundary.FirstProblem(); Check(boundary.Events.Count == count && boundary.ErrorCount == 0, "unfinished diagnosis does not fabricate logged errors");
+            var multiple = new Simulation(layout, new[] { late, blocked }, false); multiple.RunToEnd();
+            Check(multiple.FirstProblem().UnitId == 1, "earlier error takes precedence over unfinished command");
+            var empty = new Simulation(layout, new Recording[0], false); empty.RunToEnd();
+            Check(empty.FirstProblem() == null, "idle factory has no fabricated diagnosis");
+            var emptyGame = new GameSession();
+            Check(!emptyGame.Verify().Passed && emptyGame.Simulation.FirstProblem() == null, "no shipment can fail autonomy without unit error");
+        }
         public static string Run()
         {
             checks = 0; string why; var layout = Layout.Default(); Check(layout.Valid(out why), "default layout");
@@ -117,7 +159,7 @@ namespace EchoFactory.Tests
                 int group = i % 7 + 1;
                 while (!same.Finished) for (int j = 0; j < group; j++) same.Step();
                 Check(same.Trace == replay.Trace && same.Shipped == replay.Shipped, "determinism " + i);
-                Check(same.Events.Count == replay.Events.Count && same.Events.Zip(replay.Events, (a,b) => a.Tick == b.Tick && a.Message == b.Message && a.UnitId == b.UnitId && a.StationId == b.StationId && a.Error == b.Error).All(x => x), "event determinism " + i);
+                Check(same.Events.Count == replay.Events.Count && same.Events.Zip(replay.Events, (a,b) => a.Tick == b.Tick && a.Message == b.Message && a.UnitId == b.UnitId && a.StationId == b.StationId && a.Error == b.Error && a.CommandIndex == b.CommandIndex && a.Position == b.Position).All(x => x), "event determinism " + i);
             }
             var pressTest = new Simulation(layout, new Recording[0], false); var press = pressTest.Station(2); press.Input = 4;
             for (int i = 0; i < 401; i++) pressTest.Step();
@@ -167,7 +209,7 @@ namespace EchoFactory.Tests
             var full = new Simulation(layout, new Recording[0], true); Action(full, 1, CommandKind.Pickup, Material.Ore);
             while(full.Tick < 1190) full.Step(); int history = full.Operator.Commands.Count;
             Check(!full.EnqueueAction(3, CommandKind.Deposit, Material.Plate, 1, out why) && full.Operator.Commands.Count == history, "late request does not destroy recording");
-            PlacementChecks(echo); BatchAndQueueChecks();
+            PlacementChecks(echo); BatchAndQueueChecks(); DiagnosticChecks();
             return "PASS: " + checks + " assertions; 1000 deterministic replays; buffers, atomic service, conflict, upgrades, placement, autonomy, recording and payouts.";
         }
     }

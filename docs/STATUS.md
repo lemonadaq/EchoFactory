@@ -1,6 +1,6 @@
 # Echo Factory — stan projektu i wspólna lista prac
 
-Ostatnia aktualizacja: **9 września 2026**. Baza pierwszego prototypu: commit [`90199a5`](https://github.com/lemonadaq/EchoFactory/commit/90199a529689ae2cd4b8a3fb1b51487f82a0ce2f), gałąź `main`.
+Ostatnia aktualizacja: **10 września 2026**. Baza pierwszego prototypu: commit [`90199a5`](https://github.com/lemonadaq/EchoFactory/commit/90199a529689ae2cd4b8a3fb1b51487f82a0ce2f), gałąź `main`.
 
 **Jesteśmy na etapie pierwszego prototypu Unity. Rdzeń C# przeszedł testy; projekt nie został jeszcze uruchomiony w edytorze Unity.** Najbliższy cel to otworzyć halę, sprawdzić pełną pętlę i naprawić problemy z pierwszej sesji. Nie traktujemy istniejącego kodu interfejsu i zapisu jako potwierdzonego działania w Unity.
 
@@ -13,7 +13,7 @@ Ten plik jest punktem startowym dla Filipa i kolejnych sesji pracy z asystentem.
 - Główna scena: `Assets/EchoFactory/Scenes/Factory.unity`.
 - Otwarcie sceny: **Echo Factory → Otwórz halę**, następnie **Play**.
 - Testy logiki w edytorze: **Echo Factory → Uruchom testy logiki**; wynik w Console.
-- Wynik najnowszych testów poza Unity: **2125 asercji, 1000 deterministycznych powtórek** (druga sesja; szczegóły w VALIDATION).
+- Wynik najnowszych testów poza Unity: **2139 asercji, 1000 deterministycznych powtórek** (trzecia sesja; szczegóły w VALIDATION).
 - Najbliższe zadanie: **U01 — instalacja i pierwszy import w Unity**.
 - Przygotowany wcześniej prototyp przeglądarkowy jest materiałem porównawczym. Dalszy rozwój prowadzimy w tym projekcie C#.
 
@@ -58,7 +58,7 @@ Dokumenty pomocnicze: [uruchomienie i sterowanie](../README.md), [reguły projek
 | Scena, `.meta`, wersja edytora i manifest pakietów | Przygotowane; sprawdzono JSON, unikalność GUID oraz powiązania sceny. Import Unity niewykonany. |
 | Tymczasowa hala IMGUI | Kod planszy, stacji, Operatora, Echo, paneli i podsumowania istnieje. Wygląd i obsługa nieweryfikowane w Unity. |
 | Sterowanie | Kod myszy, WASD/strzałek, E, 1/2/3, pauzy i tempa 0,5× istnieje. Do testu. |
-| Dziennik | Zdarzenia i komunikaty błędów istnieją. Pełnej osi czasu jeszcze nie ma. |
+| Dziennik | Pierwszy zaobserwowany problem: czas, Echo, komenda, stacja lub pole. Diagnoza niedokończonej czynności, filtr błędów, zaznaczenie pola i przejście do stacji. Core sprawdzony; UI do testu. Pełnej osi czasu jeszcze nie ma. |
 | Zapis lokalny | Adapter JSON, plik tymczasowy, atomowe zastąpienie, kopia `.bak`, walidacja i odzyskanie. Działanie na docelowym systemie do sprawdzenia. |
 | Menu edytora | Otwarcie hali, uruchomienie testów i budowanie Windows przygotowane. Build nie został wykonany. |
 | Dokumentacja | README, DESIGN, PLAYTEST, VALIDATION i niniejszy STATUS. |
@@ -89,6 +89,14 @@ Proponowany podział: Filip uruchamia Unity i przekazuje obserwacje; asystent pr
 - Kliknięcie dotychczasowej pozycji budynku nie kasuje certyfikatu ani nie zajmuje historii cofania.
 - Zrealizowano zakres U10 opisany w tabeli. Testy potwierdzają również dwie współpracujące role Echo z transportem partii.
 - Nie zmieniono ekonomii, reguł oczekiwania ani zapisanych tras. UI podglądu wymaga pierwszego testu w Unity.
+
+## Postęp trzeciej sesji — 10 września 2026
+
+- W dzienniku dodano pierwsze zaobserwowane niepowodzenie z czasem, ID Echo, numerem komendy i miejscem. Niedokończona czynność na końcu zmiany również dostaje opis.
+- Błąd trasy pamięta problematyczne pole nawet po dalszym ruchu Echo. Wynik testu autonomii zawiera kontekst problemu.
+- Warstwa Unity ma filtr błędów, czerwoną ramkę na polu problemu, przejście do stacji i listę obsługi/oczekujących. Wizualna weryfikacja pozostaje otwarta.
+- 2139 asercji przeszło, w tym 14 nowych dla diagnostyki; porównanie 1000 replay obejmuje też nowe dane zdarzeń. Reguły produkcji, ruchu i wypłat pozostają takie same.
+- Filip planuje pierwszy test Unity po pracy. Następnie zbieramy rzeczywiste błędy Console i uwagi o sterowaniu.
 
 ## Kolejne etapy po działającej hali
 
@@ -126,7 +134,7 @@ Pełny plan zakłada do sześciu sektorów, z wariantem ograniczonym do czterech
 | O03 | Zaimplementowane, UI do testu | Podgląd analizuje trasy przez nowe pole i odwołania do przenoszonej stacji; podaje ID także wyłączonych Echo. Logika sprawdzona w Core. | Sprawdzić kolory i czytelność w Unity. Skutki pośrednie dla kolejek nadal ocenia test autonomii. |
 | O04 | Ograniczenie | Certyfikat tylko w pamięci; po ponownym uruchomieniu potrzebny test. | Trwały certyfikat związany z danymi i wersją reguł. |
 | O05 | Ograniczenie | Jeden slot obsługi, brak dróg, obracania i usuwania budynków. | Zakres rozszerzać po osobnej decyzji. |
-| O06 | Ograniczenie | Dziennik zastępuje timeline; brak grafu przyczyn błędów. | Etap diagnozy. |
+| O06 | Częściowo zrealizowane | Dziennik wskazuje pierwszy zaobserwowany problem i jego miejsce. Panel stacji pokazuje obsługę i oczekujących. Brak timeline i grafu przyczyn. | Test UI po pracy; pierwszego błędu nie utożsamiamy z pierwotną przyczyną całej awarii. |
 | O07 | Brak weryfikacji | Adapter plików i odzyskiwanie nie były sprawdzane w Unity/Windows. | U06; nie oznaczać zapisu jako w pełni przetestowanego. |
 
 **Potwierdzone błędy z sesji w Unity:** jeszcze nie zgłoszono; brak sesji nie oznacza braku błędów.
@@ -166,6 +174,7 @@ Wynik ponownego testu i data:
 | 09.09.2026 | Rozwiązanie problemu dostępu GitHub i wysłanie projektu. | Kod na `main`, commit `90199a5`. |
 | 09.09.2026 | Dodanie wspólnego pliku statusu. | Następny krok: U01, pierwszy import Unity. |
 | 09.09.2026 | Podgląd wpływu budynków na Echo i rozszerzenie testów Core (U10 / O03). | 2125 asercji przeszło; ostrzeżenia UI do testu w Unity. |
+| 10.09.2026 | Diagnostyka pierwszego problemu i podgląd oczekiwania przy stacji. | 2139 asercji przeszło; UI do sprawdzenia podczas pierwszego uruchomienia. |
 
 **Na następną sesję:** sprawdzić U01. Jeśli Unity nadal nie jest dostępne, można pracować nad konkretnymi testami Core, ale weryfikacja sceny pozostaje otwarta. Jeśli import już wykonano, zacząć od komunikatów Console i wyniku uruchomienia hali.
 

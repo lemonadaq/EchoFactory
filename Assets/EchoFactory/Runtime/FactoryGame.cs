@@ -8,7 +8,7 @@ namespace EchoFactory.Runtime
     public sealed class FactoryGame : MonoBehaviour
     {
         private GameSession game;
-        private bool paused, help, abort;
+        private bool paused, help, abort, errorsOnly;
         private double accumulator;
         private float speed = 1;
         private int selected = 2, tab, placement = -1, quantity = 1;
@@ -123,6 +123,17 @@ namespace EchoFactory.Runtime
                 Fill(r,u.IsOperator?Amber:Cyan);Label(r.x+2,r.y+4,38,22,u.IsOperator?"TY":"E"+u.Id,small,Bg);
                 if(u.CargoCount>0)Label(r.x-2,r.y+29,57,22,u.CargoCount+(u.Cargo==Material.Ore?" R":" P"),small,u.IsOperator?Amber:Cyan);
             }
+            var problem = tab==3 ? sim.FirstProblem() : null;
+            if(problem!=null)
+            {
+                var cell=problem.Position; float px=GridX+cell.X*CellSize, py=GridY+cell.Y*CellSize;
+                if(cell.X>=0&&cell.X<Rules.Width&&cell.Y>=0&&cell.Y<Rules.Height)
+                {
+                    var red=new Color(1f,.35f,.3f);
+                    Fill(new Rect(px,py,CellSize-2,3),red);Fill(new Rect(px,py+CellSize-5,CellSize-2,3),red);
+                    Fill(new Rect(px,py,3,CellSize-2),red);Fill(new Rect(px+CellSize-5,py,3,CellSize-2),red);
+                }
+            }
             Label(24,663,812,38,placementHint.Length>0?placementHint:"R = ruda · P = płyta · żółty: Operator · cyjan: Echo · pasek pod stacją: punkt obsługi",small,placementHint.Length>0?Amber:Muted);
         }
         private void Controls()
@@ -157,7 +168,12 @@ namespace EchoFactory.Runtime
             if(s.Spec.Kind!=StationKind.Feeder){Material m=s.Spec.Kind==StationKind.Press?Material.Ore:s.Spec.Kind==StationKind.Buffer?s.Spec.BufferMaterial:Material.Plate;if(Btn(255,242,244,46,s.Spec.Kind==StationKind.Dispatch?"Wyślij płyty":"Odłóż "+(m==Material.Ore?"rudę":"płyty"),can))Act(CommandKind.Deposit,m);}
             Label(0,305,500,85,op==null?"Test bez Operatora.":"Operator: "+op.CargoCount+" / "+op.Profile.Cargo+" · "+(op.Cargo==Material.None?"puste ręce":op.Cargo==Material.Ore?"ruda":"płyty")+"\n"+op.Status,body,Muted);
             if(Btn(0,403,499,42,"Przenieś budynek",Planning)){placement=selected;notice="Zależne nagrania: "+game.Dependents(selected)+". Kliknij nowe pole. Stare trasy wymagają sprawdzenia.";}
-            Label(0,465,500,86,"Punkt obsługi znajduje się pod budynkiem. Jednocześnie trwa jedna obsługa. Echo mogą przenikać się na trasie.",body,Muted);
+            var queue=game.Simulation.Units.Where(u=>u.Current!=null&&u.Current.TargetId==selected&&u.WaitSince>=0)
+                .OrderBy(u=>u.Servicing?0:1).ThenBy(u=>u.WaitSince).ThenBy(u=>u.Id).ToList();
+            string service=queue.Count==0?"Obsługa wolna. Brak oczekujących.":string.Join("\n",queue.Take(3).Select(u=>
+                (u.IsOperator?"Operator":"Echo #"+u.Id)+": "+u.Status));
+            if(queue.Count>3)service+="\nPozostałe oczekujące: "+(queue.Count-3);
+            Label(0,455,500,103,service,small,Muted);
             Label(0,565,500,64,"Budowa i ulepszenia są w zakładce Rozwój. Zmiany wykonujesz między zmianami.",small,Muted);
         }
         private void Act(CommandKind kind,Material material){string why;game.Simulation.EnqueueAction(selected,kind,material,quantity,out why);notice=why;}
@@ -207,10 +223,18 @@ namespace EchoFactory.Runtime
         }
         private void Log()
         {
-            Label(0,0,500,35,"Dziennik zmiany",heading,Cyan);Label(0,42,500,42,"Błędy: "+game.Simulation.ErrorCount+" · wpisy: "+game.Simulation.Events.Count,body,Muted);
-            var events=game.Simulation.Events.AsEnumerable().Reverse().Take(100).ToList();scroll=GUI.BeginScrollView(new Rect(0,95,510,535),scroll,new Rect(0,0,485,Math.Max(500,events.Count*65)));
-            for(int i=0;i<events.Count;i++){var e=events[i];string unit=e.UnitId==0?"Prasa":e.UnitId==int.MaxValue?"Operator":"Echo "+e.UnitId;Label(0,i*65,475,62,(e.Tick/20f).ToString("0.0")+" s · "+unit+" · #"+e.StationId+"\n"+e.Message,small,e.Error?Amber:Muted);}
-            if(events.Count==0)Label(0,0,480,80,"Zdarzenia i błędy pojawią się podczas pracy.");GUI.EndScrollView();
+            var sim=game.Simulation; var first=sim.FirstProblem();
+            Label(0,0,500,35,"Dziennik zmiany",heading,Cyan);
+            Label(0,40,500,35,"Błędy: "+sim.ErrorCount+" · wpisy: "+sim.Events.Count,small,Muted);
+            string diagnosis=first==null?(sim.Finished?"Brak błędów i niedokończonych czynności. Wynik autonomii sprawdź w zakładce Echo.":"Pierwszy problem pojawi się tutaj. Oczekiwanie sprawdzisz w panelu stacji."):
+                "Pierwszy problem · "+(first.Tick/(float)Rules.TickRate).ToString("0.0")+" s\n"+first.Context+"\n"+first.Message;
+            Label(0,79,500,112,diagnosis,small,first==null?Muted:Amber);
+            if(Btn(0,198,242,36,errorsOnly?"Pokaż wszystkie wpisy":"Tylko błędy")){errorsOnly=!errorsOnly;scroll=Vector2.zero;}
+            if(Btn(255,198,242,36,"Przejdź do stacji",first!=null&&sim.Station(first.StationId)!=null)){selected=first.StationId;tab=0;scroll=Vector2.zero;}
+            var events=sim.Events.Where(e=>!errorsOnly||e.Error).Reverse().Take(100).ToList();
+            scroll=GUI.BeginScrollView(new Rect(0,246,510,384),scroll,new Rect(0,0,485,Math.Max(360,events.Count*84)));
+            for(int i=0;i<events.Count;i++){var e=events[i];Label(0,i*84,475,81,(e.Tick/(float)Rules.TickRate).ToString("0.0")+" s · "+e.Context+"\n"+e.Message,small,e.Error?Amber:Muted);}
+            if(events.Count==0)Label(0,0,480,80,errorsOnly?"Brak wpisów błędów. Niedokończona czynność jest opisana powyżej.":"Zdarzenia pojawią się podczas pracy.");GUI.EndScrollView();
         }
         private void Overlay(string text){Fill(new Rect(0,0,ViewWidth,ViewHeight),new Color(0,0,0,.85f));Fill(new Rect(370,140,700,630),Panel);Label(400,170,640,75,text,heading,Cyan);}
         private void Help()
