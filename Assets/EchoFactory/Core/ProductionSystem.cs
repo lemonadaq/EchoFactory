@@ -30,6 +30,8 @@ namespace EchoFactory.Core
             }
         }
 
+        public static int GetMachinePrice(MachineKind kind) { return MachineCost(kind); }
+
         public static bool CanBuildMachine(StrategicState state, int facilityId, MachineKind kind)
         {
             if (state == null || state.Phase != StrategicPhase.Planning) return false;
@@ -38,6 +40,7 @@ namespace EchoFactory.Core
             {
                 var f = state.Facilities[i];
                 if (f.Id != facilityId || !f.Unlocked || f.Machines.Count >= f.MachineSlots) continue;
+                if (!FactoryLayoutSystem.IsMachineAllowed(f.Kind, kind)) return false;
                 return state.Credits >= MachineCost(kind);
             }
             return false;
@@ -81,59 +84,33 @@ namespace EchoFactory.Core
             int richness = ParcelRichness(state, facility.ParcelId);
             int logistics = ParcelLogistics(state, facility.ParcelId);
             int logisticsBonus = state.HasTechnology(TechnologyKind.SmartLogistics) ? Math.Max(0, logistics) : Math.Min(0, logistics);
-
             switch (machine.Kind)
             {
                 case MachineKind.BasicPress:
-                    if (state.GetStock(ResourceKind.Steel) < 1) return;
-                    if (state.GetStock(ResourceKind.Energy) < 1) return;
-                    state.AddStock(ResourceKind.Steel, -1);
-                    state.AddStock(ResourceKind.Energy, -1);
-                    state.AddStock(ResourceKind.FinishedGoods, 1);
-                    state.AddStock(ResourceKind.Scrap, 1);
-                    result.SteelConsumed++; result.EnergyConsumed++; result.FinishedGoods++; result.ScrapGenerated++; result.MachinesWorked++;
-                    return;
-
+                    if (state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < 1) return;
+                    state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -1); state.AddStock(ResourceKind.FinishedGoods, 1); state.AddStock(ResourceKind.Scrap, 1);
+                    result.SteelConsumed++; result.EnergyConsumed++; result.FinishedGoods++; result.ScrapGenerated++; result.MachinesWorked++; return;
                 case MachineKind.ImprovedPress:
                     if (!state.HasTechnology(TechnologyKind.ImprovedPress)) return;
                     int improvedEnergy = state.HasTechnology(TechnologyKind.EnergyEfficiency) ? 1 : 2;
                     if (state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < improvedEnergy) return;
-                    state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -improvedEnergy);
-                    state.AddStock(ResourceKind.FinishedGoods, 2); state.AddStock(ResourceKind.Scrap, 1);
-                    result.SteelConsumed++; result.EnergyConsumed += improvedEnergy; result.FinishedGoods += 2; result.ScrapGenerated++; result.MachinesWorked++;
-                    return;
-
+                    state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -improvedEnergy); state.AddStock(ResourceKind.FinishedGoods, 2); state.AddStock(ResourceKind.Scrap, 1);
+                    result.SteelConsumed++; result.EnergyConsumed += improvedEnergy; result.FinishedGoods += 2; result.ScrapGenerated++; result.MachinesWorked++; return;
                 case MachineKind.HighSpeedPress:
-                    if (!state.HasTechnology(TechnologyKind.AdvancedPress)) return;
-                    if (state.GetStock(ResourceKind.Steel) < 2 || state.GetStock(ResourceKind.Energy) < 3) return;
-                    state.AddStock(ResourceKind.Steel, -2); state.AddStock(ResourceKind.Energy, -3);
-                    int output = 3 + Math.Max(0, logisticsBonus) / 10;
-                    state.AddStock(ResourceKind.FinishedGoods, output); state.AddStock(ResourceKind.Scrap, 2);
-                    result.SteelConsumed += 2; result.EnergyConsumed += 3; result.FinishedGoods += output; result.ScrapGenerated += 2; result.MachinesWorked++;
-                    return;
-
+                    if (!state.HasTechnology(TechnologyKind.AdvancedPress) || state.GetStock(ResourceKind.Steel) < 2 || state.GetStock(ResourceKind.Energy) < 3) return;
+                    state.AddStock(ResourceKind.Steel, -2); state.AddStock(ResourceKind.Energy, -3); int output = 3 + Math.Max(0, logisticsBonus) / 10;
+                    state.AddStock(ResourceKind.FinishedGoods, output); state.AddStock(ResourceKind.Scrap, 2); result.SteelConsumed += 2; result.EnergyConsumed += 3; result.FinishedGoods += output; result.ScrapGenerated += 2; result.MachinesWorked++; return;
                 case MachineKind.Recycler:
-                    if (!state.HasTechnology(TechnologyKind.BasicAutomation)) return;
-                    if (state.GetStock(ResourceKind.Scrap) < 2 || state.GetStock(ResourceKind.Energy) < 1) return;
+                    if (!state.HasTechnology(TechnologyKind.BasicAutomation) || state.GetStock(ResourceKind.Scrap) < 2 || state.GetStock(ResourceKind.Energy) < 1) return;
                     int recovered = 1 + (state.HasTechnology(TechnologyKind.AdvancedMaterials) ? 1 : 0);
-                    state.AddStock(ResourceKind.Scrap, -2); state.AddStock(ResourceKind.Energy, -1); state.AddStock(ResourceKind.Steel, recovered);
-                    result.ScrapRecycled += 2; result.EnergyConsumed++; result.MachinesWorked++;
-                    return;
-
+                    state.AddStock(ResourceKind.Scrap, -2); state.AddStock(ResourceKind.Energy, -1); state.AddStock(ResourceKind.Steel, recovered); result.ScrapRecycled += 2; result.EnergyConsumed++; result.MachinesWorked++; return;
                 case MachineKind.Generator:
                     if (state.GetStock(ResourceKind.Bitumen) < 2) return;
                     int generated = 3 + richness / 40;
-                    state.AddStock(ResourceKind.Bitumen, -2); state.AddStock(ResourceKind.Energy, generated);
-                    result.BitumenConsumed += 2; result.EnergyGenerated += generated; result.MachinesWorked++;
-                    return;
-
+                    state.AddStock(ResourceKind.Bitumen, -2); state.AddStock(ResourceKind.Energy, generated); result.BitumenConsumed += 2; result.EnergyGenerated += generated; result.MachinesWorked++; return;
                 case MachineKind.ElectronicsAssembler:
-                    if (!state.HasTechnology(TechnologyKind.AdvancedMaterials)) return;
-                    if (state.GetStock(ResourceKind.Electronics) < 1 || state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < 2) return;
-                    state.AddStock(ResourceKind.Electronics, -1); state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -2);
-                    state.AddStock(ResourceKind.FinishedGoods, 3);
-                    result.SteelConsumed++; result.EnergyConsumed += 2; result.FinishedGoods += 3; result.MachinesWorked++;
-                    return;
+                    if (!state.HasTechnology(TechnologyKind.AdvancedMaterials) || state.GetStock(ResourceKind.Electronics) < 1 || state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < 2) return;
+                    state.AddStock(ResourceKind.Electronics, -1); state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -2); state.AddStock(ResourceKind.FinishedGoods, 3); result.SteelConsumed++; result.EnergyConsumed += 2; result.FinishedGoods += 3; result.MachinesWorked++; return;
             }
         }
 
@@ -145,17 +122,7 @@ namespace EchoFactory.Core
             if (kind == MachineKind.ElectronicsAssembler) return state.HasTechnology(TechnologyKind.AdvancedMaterials);
             return false;
         }
-
-        static int ParcelRichness(StrategicState state, int parcelId)
-        {
-            for (int i=0;i<state.Parcels.Count;i++) if (state.Parcels[i].Id == parcelId) return state.Parcels[i].ResourceRichness;
-            return 50;
-        }
-
-        static int ParcelLogistics(StrategicState state, int parcelId)
-        {
-            for (int i=0;i<state.Parcels.Count;i++) if (state.Parcels[i].Id == parcelId) return state.Parcels[i].LogisticsBonus;
-            return 0;
-        }
+        static int ParcelRichness(StrategicState state, int parcelId) { for(int i=0;i<state.Parcels.Count;i++) if(state.Parcels[i].Id==parcelId) return state.Parcels[i].ResourceRichness; return 50; }
+        static int ParcelLogistics(StrategicState state, int parcelId) { for(int i=0;i<state.Parcels.Count;i++) if(state.Parcels[i].Id==parcelId) return state.Parcels[i].LogisticsBonus; return 0; }
     }
 }
