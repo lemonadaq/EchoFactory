@@ -14,6 +14,7 @@ namespace EchoFactory.Runtime
         private FieldInfo stateField;
         private FieldInfo screenField;
         private FieldInfo selectedFacilityField;
+        private FieldInfo visibleField;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoAttach()
@@ -34,28 +35,36 @@ namespace EchoFactory.Runtime
                 DontDestroyOnLoad(go);
                 floor = go.AddComponent<FactoryFloorView>();
             }
-            if (strategicUI != null)
-            {
-                var type = typeof(StrategicGameUI);
-                stateField = type.GetField("state", BindingFlags.Instance | BindingFlags.NonPublic);
-                screenField = type.GetField("screen", BindingFlags.Instance | BindingFlags.NonPublic);
-                selectedFacilityField = type.GetField("selectedFacility", BindingFlags.Instance | BindingFlags.NonPublic);
-            }
+            var type = typeof(StrategicGameUI);
+            stateField = type.GetField("state", BindingFlags.Instance | BindingFlags.NonPublic);
+            screenField = type.GetField("screen", BindingFlags.Instance | BindingFlags.NonPublic);
+            selectedFacilityField = type.GetField("selectedFacility", BindingFlags.Instance | BindingFlags.NonPublic);
+            visibleField = typeof(FactoryFloorView).GetField("visible", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         private void OnGUI()
         {
-            if (strategicUI == null || floor == null || stateField == null || screenField == null || selectedFacilityField == null) return;
+            if (strategicUI == null || floor == null || stateField == null || screenField == null || selectedFacilityField == null || visibleField == null) return;
             if (button == null) button = new GUIStyle(GUI.skin.button) { fontSize = 15, fontStyle = FontStyle.Bold };
             GUI.matrix = Matrix4x4.Scale(new Vector3(Screen.width / W, Screen.height / H, 1));
 
             StrategicState state = stateField.GetValue(strategicUI) as StrategicState;
             object screen = screenField.GetValue(strategicUI);
             int facilityId = (int)selectedFacilityField.GetValue(strategicUI);
+            bool visible = (bool)visibleField.GetValue(floor);
             if (state == null || screen == null || screen.ToString() != "Facility" || facilityId < 0) return;
 
-            if (GUI.Button(new Rect(1120, 118, 275, 42), "WIDOK HALI  →", button))
-                floor.Show(state, facilityId);
+            if (!visible)
+            {
+                if (GUI.Button(new Rect(1120, 118, 275, 42), "WIDOK HALI  →", button))
+                    floor.Show(state, facilityId);
+            }
+            else
+            {
+                GUI.depth = -10;
+                if (GUI.Button(new Rect(40, 805, 275, 42), "← WRÓĆ DO ZARZĄDZANIA", button))
+                    floor.Hide();
+            }
         }
     }
 }
