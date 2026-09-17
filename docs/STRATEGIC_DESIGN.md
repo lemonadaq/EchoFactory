@@ -1,58 +1,99 @@
-# EchoFactory — strategic layer v0.1
+# EchoFactory — strategic layer v0.2
 
 ## Direction
-
-EchoFactory becomes a turn-based factory management game. The factory simulation remains a subsystem entered from the strategic map; real-time walking is no longer the primary game loop.
+EchoFactory is a turn-based factory management game. The factory simulation is a subsystem entered from the strategic map; real-time walking is not the primary game loop.
 
 ## Core loop
+Main Menu → Strategic Map → choose parcel / enter facility → Planning → End Turn → Resolution → Turn Summary → next turn.
 
-Main Menu → Strategic Map → choose parcel / enter facility → planning → end turn → simulation → turn summary → next turn.
+## Starter economy
+The player begins with 10,000 Credits, one owned parcel and one basic Production Hall. The starter hall is deliberately useful immediately and generates **300 Credits passive income per turn**. Production can add additional income, while operating costs prevent passive income from making the economy completely automatic.
 
-The player makes structural decisions during Planning. Ending a turn resolves production, consumption, operating costs and income. No offline income is required for the core loop.
-
-## Strategic map
-
-The first prototype contains nine deterministic parcels generated from a seed. Each parcel has:
-
-- purchase price,
-- size,
-- one primary resource,
-- resource richness,
-- logistics bonus,
-- ownership state.
-
-The starter game owns parcel 0 and contains one level-1 Production Hall with two machine slots. Starting credits: 10,000.
-
-Resource types currently defined: Steel, Energy, Bitumen, Scrap and Electronics.
-
-These values are foundation data, not final balance.
+The starter hall is the economic foundation, not the final factory. Expansion should require reinvesting profits into land, facilities, machines and research.
 
 ## Facilities
+- Production Hall — manufacturing; starter facility.
+- Logistics Hall — storage, transport and later logistics automation.
+- Energy Hall — power generation / processing.
+- Workshop — maintenance and machine upgrades.
+- Research Hall — paid unlock for the technology tree.
 
-Facility categories reserved by the model:
+The Research Hall currently costs **7,500 Credits** and can only be built on an owned parcel. These are prototype balance values.
 
-- Production Hall — manufacturing;
-- Logistics Hall — storage and movement;
-- Energy Hall — power generation / processing;
-- Workshop — maintenance and machine upgrades;
-- Research Hall — technology progression.
+## R&D / technology progression
+The Research Hall is the gate to technology progression. Buying the building does not unlock everything immediately; technologies must be researched individually and obey prerequisites.
 
-Not all categories need to be available at the beginning of the game. Unlocking should create meaningful progression rather than requiring the player to build everything.
+Current prototype technology tree:
 
-## Turn resolution v0.1
+```text
+                    Basic Automation
+                   /       |        \
+                  /        |         \
+        Improved Press  Smart Logistics  Energy Efficiency
+              |
+       Advanced Press
+              \
+          Advanced Materials
+```
 
-A Production Hall generates a small number of production cycles from its level and machine slots. Each cycle consumes one unit of Steel and produces one product unit. Product value and operating costs are deliberately simple placeholders for the first playable loop.
+Prototype research costs:
+- Basic Automation — 2,500
+- Improved Press — 3,500
+- Advanced Press — 4,500
+- Smart Logistics — 5,500
+- Energy Efficiency — 6,500
+- Advanced Materials — 7,500
 
-The current resolver records income, costs and production in the turn summary, then advances to the next Planning phase.
+The tree is intentionally small. Later technologies should unlock **new machines, machine upgrades, new hall categories, production chains and automation**, rather than being a collection of flat percentage bonuses.
 
-## UX direction
+## Intended progression
+A typical early game should feel like:
 
-The strategic layer should use a light, readable industrial management presentation. Avoid the dark, visually heavy prototype treatment. Final 3D models and art can replace temporary geometry without changing the Core state model.
+```text
+Starter Hall
+   ↓
+Passive income + simple production
+   ↓
+Buy first additional parcel
+   ↓
+Build / expand production
+   ↓
+Save for Research Hall
+   ↓
+Research first technology
+   ↓
+Unlock better machine / upgrade
+   ↓
+Increase production efficiency
+   ↓
+Unlock new hall category
+   ↓
+New resources + production chains
+   ↓
+Expand the factory network
+```
+
+## Design rule: every unlock should create a new decision
+Avoid technology that only says “+5%”. Prefer unlocks such as:
+- a new press that changes throughput vs. power consumption;
+- a larger buffer that changes factory layout;
+- a logistics system that reduces transport overhead;
+- an energy technology that enables high-power machines;
+- a new hall that creates a new production chain.
+
+Flat bonuses can exist, but should support a meaningful mechanical unlock.
+
+## Parcels
+Each parcel has price, size, primary resource, resource richness, logistics bonus and ownership. Different map seeds produce different resource distributions. Parcels should eventually create strategic specialization: cheap land, rich deposits, logistics hubs and large expansion sites should all have different consequences.
+
+## Turn resolution
+Production, passive income, operating costs and other economic effects resolve when the player ends the turn. No offline income is required for the core loop.
+
+## Visual direction
+Use a lighter, readable industrial-management presentation rather than the dark prototype palette. Temporary geometry is acceptable until the systems are proven; final models can be introduced later without changing the Core state model.
 
 ## Scope discipline
-
-Do not add workers, research trees, contracts, random events, complex supply chains or additional resource transformations until the following loop is playable in Unity:
-
+The immediate playable target remains:
 1. Main Menu
 2. Strategic Map
 3. Parcel selection
@@ -62,4 +103,4 @@ Do not add workers, research trees, contracts, random events, complex supply cha
 7. Turn Summary
 8. Return to Map
 
-The existing Echo logistics and factory simulation remain valuable, but they should be connected to this strategic layer after the turn loop is validated.
+After this is validated in Unity, connect the existing Echo factory simulation to the Production Hall and then expand R&D, machines, contracts, events and additional production chains.
