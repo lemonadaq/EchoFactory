@@ -4,9 +4,10 @@ using System.Collections.Generic;
 namespace EchoFactory.Core
 {
     public enum StrategicPhase { Planning, Resolving, Summary }
-    public enum ResourceKind { None, Steel, Energy, Bitumen, Scrap, Electronics }
+    public enum ResourceKind { None, Steel, Energy, Bitumen, Scrap, Electronics, FinishedGoods }
     public enum FacilityKind { Empty, ProductionHall, LogisticsHall, EnergyHall, Workshop, ResearchHall }
     public enum TechnologyKind { None, BasicAutomation, ImprovedPress, AdvancedPress, SmartLogistics, EnergyEfficiency, AdvancedMaterials }
+    public enum MachineKind { BasicPress, ImprovedPress, HighSpeedPress, Recycler, Generator, ElectronicsAssembler }
 
     [Serializable]
     public sealed class TechnologyState
@@ -33,13 +34,29 @@ namespace EchoFactory.Core
         public FacilityKind Kind;
         public bool Unlocked = true;
         public int PassiveIncomePerTurn;
-        public FacilityState Copy() { return (FacilityState)MemberwiseClone(); }
+        public List<MachineState> Machines = new List<MachineState>();
+        public FacilityState Copy()
+        {
+            var c = (FacilityState)MemberwiseClone();
+            c.Machines = new List<MachineState>();
+            for (int i=0;i<Machines.Count;i++) c.Machines.Add(Machines[i].Copy());
+            return c;
+        }
+    }
+
+    [Serializable]
+    public sealed class MachineState
+    {
+        public int Id, FacilityId, Level = 1;
+        public MachineKind Kind;
+        public bool Enabled = true;
+        public MachineState Copy() { return (MachineState)MemberwiseClone(); }
     }
 
     [Serializable]
     public sealed class StrategicState
     {
-        public int Turn = 1, Credits = 10000, NextFacilityId = 1;
+        public int Turn = 1, Credits = 10000, NextFacilityId = 1, NextMachineId = 1;
         public StrategicPhase Phase = StrategicPhase.Planning;
         public int LastTurnIncome, LastTurnCosts, LastTurnProduction, LastPassiveIncome, LastResearchSpent;
         public List<ParcelState> Parcels = new List<ParcelState>();
@@ -55,7 +72,7 @@ namespace EchoFactory.Core
         }
         public StrategicState Copy()
         {
-            var c = new StrategicState { Turn=Turn, Credits=Credits, NextFacilityId=NextFacilityId, Phase=Phase, LastTurnIncome=LastTurnIncome, LastTurnCosts=LastTurnCosts, LastTurnProduction=LastTurnProduction, LastPassiveIncome=LastPassiveIncome, LastResearchSpent=LastResearchSpent };
+            var c = new StrategicState { Turn=Turn, Credits=Credits, NextFacilityId=NextFacilityId, NextMachineId=NextMachineId, Phase=Phase, LastTurnIncome=LastTurnIncome, LastTurnCosts=LastTurnCosts, LastTurnProduction=LastTurnProduction, LastPassiveIncome=LastPassiveIncome, LastResearchSpent=LastResearchSpent };
             for (int i=0;i<Parcels.Count;i++) c.Parcels.Add(Parcels[i].Copy());
             for (int i=0;i<Facilities.Count;i++) c.Facilities.Add(Facilities[i].Copy());
             for (int i=0;i<Technologies.Count;i++) c.Technologies.Add(Technologies[i].Copy());
@@ -73,8 +90,10 @@ namespace EchoFactory.Core
         {
             var s = new StrategicState { Parcels = GenerateParcels(seed, 9) };
             s.Parcels[0].Owned = true;
-            // The starter facility is intentionally useful before the player unlocks R&D.
-            s.Facilities.Add(new FacilityState { Id=s.NextFacilityId++, Kind=FacilityKind.ProductionHall, ParcelId=0, MachineSlots=2, PassiveIncomePerTurn=300 });
+            // The starter hall earns passive income and contains one intentionally simple machine.
+            var starter = new FacilityState { Id=s.NextFacilityId++, Kind=FacilityKind.ProductionHall, ParcelId=0, MachineSlots=2, PassiveIncomePerTurn=300 };
+            starter.Machines.Add(new MachineState { Id=s.NextMachineId++, FacilityId=starter.Id, Kind=MachineKind.BasicPress });
+            s.Facilities.Add(starter);
             for (int i=0;i<StartingTechnologies.Length;i++) s.Technologies.Add(new TechnologyState { Kind=StartingTechnologies[i], ResearchCost=2500 + i*1000 });
             s.AddStock(ResourceKind.Steel, 25);
             return s;
