@@ -13,7 +13,15 @@ namespace EchoFactory.Core
     [Serializable] public sealed class ParcelState { public int Id, Price, Size, ResourceRichness, LogisticsBonus; public ResourceKind Resource; public bool Owned; public ParcelState Copy() { return (ParcelState)MemberwiseClone(); } }
 
     [Serializable]
-    public sealed class MachineState { public int Id, FacilityId, Level = 1; public MachineKind Kind; public bool Enabled = true; public MachineState Copy() { return (MachineState)MemberwiseClone(); } }
+    public sealed class MachineState
+    {
+        public int Id, FacilityId, Level = 1;
+        public MachineKind Kind;
+        public bool Enabled = true;
+        // Normalized floor coordinates (0..1). Negative means not placed yet.
+        public float X = -1f, Y = -1f;
+        public MachineState Copy() { return (MachineState)MemberwiseClone(); }
+    }
 
     [Serializable]
     public sealed class FacilityState
