@@ -2,11 +2,14 @@ using System;
 using System.Linq;
 using EchoFactory.Core;
 using UnityEngine;
+using Material = EchoFactory.Core.Material;
 namespace EchoFactory.Runtime
 {
     // Prototype presentation only; no production or movement rules belong here.
     public sealed class FactoryGame : MonoBehaviour
     {
+        /// <summary>Set by GameUI; draws a button that returns to the main menu.</summary>
+        public Action Exit;
         private GameSession game;
         private bool paused, help, abort, errorsOnly;
         private double accumulator;
@@ -69,6 +72,7 @@ namespace EchoFactory.Runtime
         {
             InitStyles();GUI.matrix=Matrix4x4.Scale(new Vector3(Screen.width/ViewWidth,Screen.height/ViewHeight,1));Fill(new Rect(0,0,ViewWidth,ViewHeight),Bg);
             Label(24,22,650,46,"ECHO FACTORY",title,Cyan);Label(25,69,760,26,"HALA 01 / PROTOTYP UNITY / LINIA PRODUKCYJNA",small,Muted);
+            if(Exit!=null&&Btn(640,26,220,36,"← MENU GŁÓWNE",game==null||Planning)){Save();Exit();return;}
             if(game==null)
             {
                 Label(50,150,1250,160,"Nie można wczytać zapisu. "+fatal,heading);

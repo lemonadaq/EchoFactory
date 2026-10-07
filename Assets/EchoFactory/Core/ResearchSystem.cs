@@ -25,7 +25,8 @@ namespace EchoFactory.Core
             for (int i=0;i<state.Technologies.Count;i++)
             {
                 var tech = state.Technologies[i];
-                if (tech.Kind != technology || tech.Unlocked) return false;
+                if (tech.Kind != technology) continue;
+                if (tech.Unlocked) return false;
                 if (!PrerequisiteMet(state, technology)) return false;
                 if (state.Credits < tech.ResearchCost) return false;
                 state.Credits -= tech.ResearchCost;
@@ -36,7 +37,18 @@ namespace EchoFactory.Core
             return false;
         }
 
-        static bool HasResearchHall(StrategicState state)
+        public static bool CanUnlock(StrategicState state, TechnologyKind technology)
+        {
+            if (state == null || state.Phase != StrategicPhase.Planning || !HasResearchHall(state)) return false;
+            for (int i=0;i<state.Technologies.Count;i++)
+            {
+                var tech = state.Technologies[i];
+                if (tech.Kind == technology) return !tech.Unlocked && PrerequisiteMet(state, technology) && state.Credits >= tech.ResearchCost;
+            }
+            return false;
+        }
+
+        public static bool HasResearchHall(StrategicState state)
         {
             for (int i=0;i<state.Facilities.Count;i++) if (state.Facilities[i].Kind == FacilityKind.ResearchHall && state.Facilities[i].Unlocked) return true;
             return false;

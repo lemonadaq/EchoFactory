@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <!-- Uniwersalna karta listy: hale, budowa, technologie. -->
+    <Style src="Game.uss" />
+    <ui:VisualElement name="card" class="panel card">
+        <ui:VisualElement class="card__text">
+            <ui:Label name="title" text="HALA PRODUKCYJNA" class="h2" />
+            <ui:Label name="detail" text="Szczegóły" class="small" />
+        </ui:VisualElement>
+        <ui:Button name="action" text="OTWÓRZ" class="btn" style="width: 170px;" />
+    </ui:VisualElement>
+</ui:UXML>

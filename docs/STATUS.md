@@ -17,6 +17,8 @@ Ten plik jest punktem startowym dla Filipa i kolejnych sesji pracy z asystentem.
 - Najbliższe zadanie: **U01 — instalacja i pierwszy import w Unity**.
 - Przygotowany wcześniej prototyp przeglądarkowy jest materiałem porównawczym. Dalszy rozwój prowadzimy w tym projekcie C#.
 
+**Aktualna lista zadań do grywalnej wersji: [TASKS.md](TASKS.md)** (7 października 2026: interfejs przeniesiony do UI Toolkit; zadanie G00).
+
 Dokumenty pomocnicze: [uruchomienie i sterowanie](../README.md), [reguły projektu](DESIGN.md), [scenariusz pierwszej sesji](PLAYTEST.md), [dowody i granice testów](VALIDATION.md).
 
 ## Jak czytać status

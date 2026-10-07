@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="Game.uss" />
+    <ui:VisualElement name="item" class="shop-item">
+        <ui:VisualElement name="icon" class="shop-item__icon machine--BasicPress" />
+        <ui:Button name="buy" text="Prasa · 1200 C" class="btn grow" />
+    </ui:VisualElement>
+</ui:UXML>

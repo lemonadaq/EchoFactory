@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="Game.uss" />
+    <ui:VisualElement name="box" class="resource-box">
+        <ui:Label name="name" text="STAL" class="resource-box__name" />
+        <ui:Label name="amount" text="0" class="resource-box__amount" />
+    </ui:VisualElement>
+</ui:UXML>

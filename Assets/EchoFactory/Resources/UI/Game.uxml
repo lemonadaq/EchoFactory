@@ -1,0 +1,132 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <!-- Główny ekran gry. Otwórz w UI Builder (dwuklik na pliku), żeby przesuwać i stylować elementy.
+         Nie zmieniaj atrybutów "name" — po nich kod (GameUI.cs) znajduje elementy. -->
+    <Style src="Game.uss" />
+    <ui:VisualElement name="root" class="root">
+
+        <!-- ================= MENU ================= -->
+        <ui:VisualElement name="screen-menu" class="screen menu">
+            <ui:Label text="ECHO FACTORY" class="title" />
+            <ui:Label text="Strategia produkcji. Nie budujesz bonusów — budujesz system." class="menu__tagline" />
+            <ui:VisualElement class="panel menu__card">
+                <ui:Label text="PROTOTYP — WARSTWA STRATEGICZNA" class="h2 accent" />
+                <ui:Label text="Kupuj działki, rozwijaj hale, badaj technologie, ustawiaj maszyny i kończ tury. Każda decyzja zmienia przepływ surowców, energii, złomu i gotowych produktów." class="body" style="margin-top: 12px; margin-bottom: 18px;" />
+                <ui:VisualElement class="row">
+                    <ui:Button name="btn-new-game" text="NOWA GRA" class="btn btn--primary" style="width: 260px; height: 52px;" />
+                    <ui:Button name="btn-echo-hall" text="PROTOTYP HALI ECHO" class="btn" style="width: 260px; height: 52px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label text="Grafika jest tymczasowa. Wygląd zmieniasz w UI Builder, a obrazki maszyn w folderze Assets/EchoFactory/Art." class="small" style="margin-top: 40px;" />
+        </ui:VisualElement>
+
+        <!-- ================= GRA ================= -->
+        <ui:VisualElement name="game" class="grow">
+            <ui:VisualElement name="top-bar" class="top-bar">
+                <ui:Label text="ECHO FACTORY" class="top-bar__brand" />
+                <ui:Button name="nav-map" text="MAPA" class="btn" />
+                <ui:Button name="nav-facility" text="KONSTRUKCJE" class="btn" />
+                <ui:Button name="nav-research" text="R&amp;D" class="btn" />
+                <ui:VisualElement class="spacer" />
+                <ui:Label name="lbl-turn" text="TURA 1 · PLANOWANIE" class="h2" />
+                <ui:Label name="lbl-credits" text="10000 C" class="top-bar__credits" />
+                <ui:Label name="lbl-stock" text="STAL 0 | EN 0 | ZŁOM 0" class="top-bar__stock" />
+                <ui:Button name="btn-end-turn" text="ZAKOŃCZ TURĘ" class="btn btn--primary" style="width: 180px;" />
+            </ui:VisualElement>
+
+            <!-- ---------- Mapa ---------- -->
+            <ui:VisualElement name="screen-map" class="screen row" style="align-items: flex-start;">
+                <ui:VisualElement>
+                    <ui:Label text="MAPA PRZEMYSŁOWA" class="h1" />
+                    <ui:Label text="Każda działka ma inny profil zasobów, logistykę i koszt wejścia." class="small" style="margin-bottom: 10px;" />
+                    <ui:VisualElement name="parcel-grid" class="parcel-grid" />
+                </ui:VisualElement>
+                <ui:VisualElement name="parcel-panel" class="panel grow" style="margin-left: 20px; min-height: 600px;">
+                    <ui:Label name="lbl-parcel-title" text="DZIAŁKA 1" class="h1 accent" />
+                    <ui:Label name="lbl-parcel-info" text="Surowiec: —" class="body" style="margin-top: 10px; margin-bottom: 16px;" />
+                    <ui:Button name="btn-buy-parcel" text="KUP DZIAŁKĘ" class="btn btn--primary" style="width: 300px;" />
+                    <ui:Label name="lbl-parcel-hint" text="" class="small amber" />
+                    <ui:Label name="lbl-parcel-objects" text="OBIEKTY NA DZIAŁCE" class="h2" style="margin-top: 16px;" />
+                    <ui:VisualElement name="parcel-facilities" />
+                    <ui:VisualElement class="spacer" />
+                    <ui:Button name="btn-manage-parcel" text="ZARZĄDZAJ DZIAŁKĄ" class="btn" style="width: 260px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ---------- Konstrukcje ---------- -->
+            <ui:VisualElement name="screen-facility" class="screen row" style="align-items: flex-start;">
+                <ui:VisualElement class="grow" style="margin-right: 20px;">
+                    <ui:Label name="lbl-facility-title" text="ZARZĄDZANIE · DZIAŁKA 1" class="h1" />
+                    <ui:Label name="lbl-facility-hint" text="" class="body amber" />
+                    <ui:ScrollView name="facility-list" style="max-height: 560px;" />
+                    <ui:Button name="btn-back-map" text="← WRÓĆ NA MAPĘ" class="btn" style="width: 250px; margin-top: 12px;" />
+                </ui:VisualElement>
+                <ui:VisualElement class="grow">
+                    <ui:Label text="BUDOWA HALI" class="h1" />
+                    <ui:VisualElement name="build-list" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ---------- Hala (widok produkcji) ---------- -->
+            <ui:VisualElement name="screen-hall" class="screen">
+                <ui:VisualElement class="row" style="margin-bottom: 10px;">
+                    <ui:Label name="lbl-hall-title" text="HALA #1 · HALA PRODUKCYJNA" class="h1 accent" />
+                    <ui:VisualElement class="spacer" />
+                    <ui:Label name="lbl-hall-slots" text="Sloty: 1 / 2" class="h2" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hall-layout">
+                    <ui:VisualElement class="flow-column">
+                        <ui:Label text="WEJŚCIA" class="h2 accent" style="margin-bottom: 8px;" />
+                        <ui:VisualElement name="hall-inputs" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="hall-floor" class="hall-floor">
+                        <ui:Label name="lbl-floor-caption" text="HALA PRODUKCYJNA · kliknij maszynę, aby ją wybrać" class="small hall-floor__caption" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="flow-column">
+                        <ui:Label text="WYJŚCIA" class="h2 accent" style="margin-bottom: 8px;" />
+                        <ui:VisualElement name="hall-outputs" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="panel side-panel">
+                        <ui:Label text="WYBRANA MASZYNA" class="h2" />
+                        <ui:Label name="lbl-machine-name" text="—" class="h2 accent" style="margin-top: 6px;" />
+                        <ui:Label name="lbl-machine-info" text="Kliknij maszynę na hali." class="small" />
+                        <ui:Button name="btn-machine-toggle" text="WYŁĄCZ" class="btn" />
+                        <ui:Label text="KUP MASZYNĘ" class="h2" style="margin-top: 16px;" />
+                        <ui:Label name="lbl-shop-hint" text="Wybierz maszynę, potem kliknij wolne miejsce na hali." class="small" />
+                        <ui:ScrollView name="machine-shop" class="grow" />
+                        <ui:Button name="btn-cancel-place" text="ANULUJ USTAWIANIE" class="btn" />
+                        <ui:Button name="btn-back-facility" text="← WRÓĆ DO ZARZĄDZANIA" class="btn" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ---------- R&D ---------- -->
+            <ui:VisualElement name="screen-research" class="screen row" style="align-items: flex-start;">
+                <ui:VisualElement class="grow">
+                    <ui:Label text="R&amp;D · DRZEWO TECHNOLOGII" class="h1" />
+                    <ui:Label name="lbl-research-hint" text="" class="body" style="margin-bottom: 8px;" />
+                    <ui:VisualElement name="tech-list" />
+                </ui:VisualElement>
+                <ui:VisualElement class="panel" style="width: 410px; margin-left: 20px;">
+                    <ui:Label text="HALA BADAWCZA" class="h2 accent" />
+                    <ui:Label name="lbl-lab-info" text="7500 C · jedna na całą sieć. Odblokowuje drzewo R&amp;D." class="body" style="margin-top: 8px; margin-bottom: 12px;" />
+                    <ui:Button name="btn-build-lab" text="ZBUDUJ HALĘ BADAWCZĄ" class="btn btn--primary" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ---------- Podsumowanie tury ---------- -->
+            <ui:VisualElement name="screen-summary" class="screen row" style="align-items: flex-start;">
+                <ui:VisualElement class="panel" style="width: 760px;">
+                    <ui:Label name="lbl-summary-title" text="PODSUMOWANIE TURY 1" class="h1" />
+                    <ui:Label text="WYNIK SYSTEMU PRODUKCJI" class="h2 accent" style="margin-top: 14px;" />
+                    <ui:Label name="lbl-summary-body" text="" class="body" style="margin-top: 10px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="width: 520px; margin-left: 30px;">
+                    <ui:Label name="lbl-summary-verdict" text="" class="h1" style="white-space: normal;" />
+                    <ui:Button name="btn-next-turn" text="NASTĘPNA TURA" class="btn btn--primary" style="width: 330px; height: 55px; margin-top: 30px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:Label name="lbl-message" text="" class="toast" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>
