@@ -65,6 +65,28 @@ namespace EchoFactory.Tests
             Assert(chain.FinishedGoods==2,ref assertions);
             Assert(before-synergy.GetStock(ResourceKind.Energy)==1,ref assertions);
 
+            // A01: extraction keeps the starter strategy alive and never produces from nothing.
+            var mine=StrategicWorldGenerator.NewGame(12345);
+            Assert(mine.Parcels[0].Resource==ResourceKind.Steel,ref assertions);
+            var rich=new ParcelState{Owned=true,Resource=ResourceKind.Bitumen,ResourceRichness=100};
+            var poor=new ParcelState{Owned=true,Resource=ResourceKind.Bitumen,ResourceRichness=35};
+            Assert(ExtractionSystem.YieldPerTurn(rich)==5 && ExtractionSystem.YieldPerTurn(poor)==1,ref assertions);
+            Assert(ExtractionSystem.YieldPerTurn(new ParcelState{Owned=false,Resource=ResourceKind.Steel,ResourceRichness=100})==0,ref assertions);
+            int goods=0, steelMined=mine.Parcels[0].ResourceRichness/ExtractionSystem.RichnessPerUnit;
+            for(int t=0;t<20;t++)
+            {
+                var r=TurnSystem.EndTurn(mine);
+                Assert(mine.LastExtracted[ResourceKind.Steel]==steelMined,ref assertions);
+                Assert(r.Production>=1,ref assertions);
+                goods+=r.Production;
+                TurnSystem.ContinueToPlanning(mine);
+            }
+            Assert(goods==20 && mine.Credits>10000,ref assertions);
+            var bought=StrategicWorldGenerator.NewGame(5); var extra=bought.Parcels[1]; bought.Credits=extra.Price;
+            int before1=bought.GetStock(extra.Resource);
+            ParcelSystem.Buy(bought,extra.Id); var mined=ExtractionSystem.Extract(bought);
+            Assert(mined[extra.Resource]>=ExtractionSystem.YieldPerTurn(extra) && bought.GetStock(extra.Resource)>before1,ref assertions);
+
             return assertions;
         }
 

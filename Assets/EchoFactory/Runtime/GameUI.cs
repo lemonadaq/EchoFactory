@@ -543,13 +543,34 @@ namespace EchoFactory.Runtime
             }
         }
 
+        private string ExtractionText()
+        {
+            string text = "";
+            foreach (var p in state.LastExtracted) text += (text.Length > 0 ? ", " : "") + ResourceName(p.Key) + " +" + p.Value;
+            return text.Length > 0 ? text : "brak";
+        }
+
+        private static string ResourceName(ResourceKind kind)
+        {
+            switch (kind)
+            {
+                case ResourceKind.Steel: return "stal";
+                case ResourceKind.Energy: return "energia";
+                case ResourceKind.Bitumen: return "bitum";
+                case ResourceKind.Scrap: return "złom";
+                case ResourceKind.Electronics: return "elektronika";
+                default: return kind.ToString();
+            }
+        }
+
         private void RefreshSummary()
         {
             SetText("lbl-summary-title", "PODSUMOWANIE TURY " + state.Turn);
             SetText("lbl-summary-body",
                 "Produkcja: " + state.LastTurnProduction + " szt.\n" +
                 "Przychód: +" + state.LastTurnIncome + " C (w tym pasywny +" + state.LastPassiveIncome + " C)\n" +
-                "Koszt operacyjny: -" + state.LastTurnCosts + " C\n\n" +
+                "Koszt operacyjny: -" + state.LastTurnCosts + " C\n" +
+                "Wydobycie: " + ExtractionText() + "\n\n" +
                 "Stal: " + state.GetStock(ResourceKind.Steel) + " · Energia: " + state.GetStock(ResourceKind.Energy) + " · Złom: " + state.GetStock(ResourceKind.Scrap) + "\n\n" +
                 "Saldo: " + state.Credits + " C");
             var verdict = Find<Label>("lbl-summary-verdict");

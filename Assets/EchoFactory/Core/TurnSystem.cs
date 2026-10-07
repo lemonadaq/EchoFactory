@@ -18,6 +18,7 @@ namespace EchoFactory.Core
             if(state==null)throw new ArgumentNullException("state");
             if(state.Phase!=StrategicPhase.Planning)throw new InvalidOperationException("Turn can only end from Planning phase.");
             state.Phase=StrategicPhase.Resolving;
+            state.LastExtracted=ExtractionSystem.Extract(state);
             var production=ProductionSystem.Resolve(state);
             int passiveIncome=0;
             for(int i=0;i<state.Facilities.Count;i++)if(state.Facilities[i].Unlocked)passiveIncome+=state.Facilities[i].PassiveIncomePerTurn;
