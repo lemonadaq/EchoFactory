@@ -1,0 +1,98 @@
+name: Agent Echo Factory
+
+# Co 2 godziny agent Claude wykonuje JEDNO zadanie z docs/TASKS.md, aktualizuje listę zadań
+# i wysyła zmiany prosto na main — tylko jeśli testy przechodzą.
+# Wymaga sekretu CLAUDE_CODE_OAUTH_TOKEN (wygeneruj: `claude setup-token`).
+# Wyłączenie: Actions → "Agent Echo Factory" → ••• → Disable workflow.
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Opcjonalnie: ID zadania z docs/TASKS.md albo krótkie polecenie"
+        required: false
+        default: ""
+
+concurrency:
+  group: echo-factory-agent
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  id-token: write
+
+jobs:
+  work:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Przygotuj git
+        run: |
+          git config user.name "echo-factory-agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "START_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Agent wykonuje jedno zadanie
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          prompt: |
+            Jesteś agentem rozwijającym grę Echo Factory (Unity 6, C#) w repozytorium ${{ github.repository }}.
+            Przeczytaj plik .github/agent/INSTRUCTIONS.md i wykonaj dokładnie to, co opisuje.
+            Zadanie wskazane ręcznie przy uruchomieniu (puste = wybierz sam według instrukcji): "${{ github.event.inputs.task }}"
+          claude_args: >-
+            --model ${{ vars.AGENT_MODEL || 'claude-sonnet-5-5' }}
+            --max-turns 80
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash"
+
+      - name: Bramka testów
+        id: gate
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A && git commit -m "agent: niezacommitowane zmiany z przebiegu ${{ github.run_id }}"
+          fi
+          if [ "$(git rev-parse HEAD)" = "$START_SHA" ]; then
+            echo "Agent nie wprowadził zmian."; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          if git diff --name-only "$START_SHA" HEAD | grep -q '^\.github/'; then
+            echo "Agent zmienił pliki w .github/ — to niedozwolone."; echo "passed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if dotnet run --project Tests/CoreRunner && dotnet build Tests/UnityCompileCheck -nologo; then
+            echo "passed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wyślij na main
+        if: steps.gate.outputs.changed == 'true' && steps.gate.outputs.passed == 'true'
+        run: |
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Odłóż zmiany, które nie przeszły testów
+        if: steps.gate.outputs.changed == 'true' && steps.gate.outputs.passed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="agent/odrzucone-${{ github.run_id }}"
+          git push origin "HEAD:refs/heads/$branch"
+          gh issue create \
+            --title "Agent: zmiany nie przeszły testów (przebieg ${{ github.run_id }})" \
+            --body "Zmiany zapisano na gałęzi \`$branch\` i NIE wysłano na main. Log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          exit 1
