@@ -86,7 +86,7 @@ dotnet run --project Tests/CoreRunner/CoreRunner.csproj --configuration Release 
 - `Assets/EchoFactory/Core`: dane, deterministyczna ścieżka BFS, tick 20 Hz, nagrania, ekonomia i planowanie.
 - `Assets/EchoFactory/Runtime`: `GameUI` (UI Toolkit, warstwa strategiczna), `FactoryGame` (hala Echo, jeszcze IMGUI), adapter zapisu.
 - `Assets/EchoFactory/Resources/UI`: układ (UXML) i wygląd (USS) do edycji w UI Builder; `Assets/EchoFactory/Art`: obrazki.
-- `docs/TASKS.md`: lista zadań do grywalnej wersji.
+- `docs/TASKS.md`: lista zadań do grywalnej wersji; `docs/AGENT_LOG.md` i `.github/agent/INSTRUCTIONS.md`: agent w GitHub Actions.
 - `Assets/EchoFactory/Editor`: menu uruchomienia, testów i opcjonalnego buildu Windows.
 - `Assets/EchoFactory/Tests`: wspólne testy C#, dostępne także poza edytorem.
 - `docs/DESIGN.md`: przyjęte decyzje i doprecyzowania do tej implementacji.
