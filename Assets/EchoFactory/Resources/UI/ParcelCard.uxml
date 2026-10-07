@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <!-- Karta działki na mapie. Kod wypełnia elementy po nazwie. -->
+    <Style src="Game.uss" />
+    <ui:VisualElement name="card" class="panel parcel-card">
+        <ui:Label name="name" text="DZIAŁKA 1" class="parcel-card__name" />
+        <ui:Label name="resource" text="STAL" class="parcel-card__resource" />
+        <ui:Label name="stats" text="Zasób: 50 · Log: +5" class="small" />
+        <ui:Label name="price" text="900 m² · 5000 C" class="small" />
+        <ui:Button name="open" text="OTWÓRZ" class="btn" style="min-height: 26px; padding: 2px 10px; width: 110px;" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,20 +1,31 @@
 # Echo Factory — prototyp Unity
 
-Pierwsza hala gry o automatyzacji przez nagrywanie własnej pracy. Projekt jest napisany w C#, z niezależną symulacją i tymczasowym interfejsem 2D w Unity.
+Strategiczna gra o budowaniu systemu produkcji (działki, hale, maszyny, R&D, tury) z prototypem hali Echo, czyli automatyzacji przez nagrywanie własnej pracy. Reguły gry są w czystym C# (`Assets/EchoFactory/Core`). Interfejs powstaje w **UI Toolkit** i edytujesz go graficznie w **UI Builder**.
 
-**Edytor przypięty w projekcie: Unity 6.3 LTS, dokładnie `6000.3.18f1`.** [Strona tej wersji i instalatory](https://unity.com/releases/editor/whats-new/6000.3.18f1). Jest to wybrana, zweryfikowana dostępna wersja, nie deklaracja najnowszego patcha. Na tym etapie używamy wbudowanego renderera i IMGUI; docelowa oprawa URP 2D i Input System są odłożone do kolejnego etapu. Logika nie zależy od renderera.
+**Edytor przypięty w projekcie: Unity 6.3 LTS, dokładnie `6000.3.18f1`.** [Strona tej wersji i instalatory](https://unity.com/releases/editor/whats-new/6000.3.18f1).
 
 ## Uruchomienie po instalacji Unity
 
-1. Pobierz repozytorium przez `git clone https://github.com/lemonadaq/EchoFactory.git` lub **Code → Download ZIP** i rozpakuj.
-2. Zainstaluj Unity Hub, a w nim edytor **6000.3.18f1**. Do pracy w edytorze nie potrzebujesz teraz dodatkowych modułów mobilnych ani WebGL.
-3. W Unity Hub wybierz **Add → Add project from disk** i wskaż folder zawierający `Assets`, `Packages` i `ProjectSettings`. Nie twórz nowego projektu wewnątrz tego folderu.
-4. Otwórz projekt. Po imporcie wybierz **Echo Factory → Otwórz halę** albo otwórz `Assets/EchoFactory/Scenes/Factory.unity`.
-5. Wciśnij **Play**. W oknie Game ustaw proporcje zbliżone do **1440 × 930** i powiększ je w razie potrzeby. Interfejs jest tymczasową planszą schematyczną.
+1. Pobierz repozytorium przez `git clone https://github.com/lemonadaq/EchoFactory.git` lub **Code → Download ZIP** i rozpakuj. Aktualizacje pobierasz przez `UPDATE.bat`.
+2. Zainstaluj Unity Hub, a w nim edytor **6000.3.18f1**.
+3. W Unity Hub wybierz **Add → Add project from disk** i wskaż folder zawierający `Assets`, `Packages` i `ProjectSettings`.
+4. Po imporcie wybierz **Echo Factory → Otwórz halę** albo otwórz `Assets/EchoFactory/Scenes/Factory.unity`.
+5. Wciśnij **Play**. Pojawi się menu: **NOWA GRA** uruchamia warstwę strategiczną, **PROTOTYP HALI ECHO** uruchamia starszą halę z nagrywaniem Echo.
 
-Projekt nie wymaga płatnych assetów. W repozytorium są stabilne pliki `.meta` i scena startowa; Unity uzupełni pozostałe domyślne ustawienia przy pierwszym imporcie.
+## Jak zmieniać wygląd graficznie
 
-## Jak grać
+| Co chcesz zmienić | Gdzie |
+| --- | --- |
+| Układ ekranów, teksty, przyciski, rozmiary | **Echo Factory → Edytuj wygląd gry (UI Builder)** albo dwuklik na `Assets/EchoFactory/Resources/UI/Game.uxml` |
+| Kolory całej gry | `Game.uss`, sekcja `:root` (np. `--c-accent`). W UI Builder: panel **StyleSheets → Game.uss** |
+| Wygląd karty działki, hali, maszyny, zasobu | `ParcelCard.uxml`, `ListCard.uxml`, `Machine.uxml`, `ResourceBox.uxml`, `ShopItem.uxml` w tym samym folderze |
+| Obrazki maszyn | Podmień PNG w `Assets/EchoFactory/Art/Machines` (ta sama nazwa pliku) albo zmień `background-image` w klasie `.machine--NazwaMaszyny` |
+
+Zmiany zapisane w UI Builder widać od razu, nawet w trybie Play. **Nie zmieniaj atrybutu `name` elementów.** Po nazwach skrypt `Runtime/GameUI.cs` odnajduje przyciski i etykiety. Wygląd (`class`, styl, położenie) możesz zmieniać dowolnie.
+
+## Prototyp hali Echo
+
+### Jak grać
 
 - Kliknij **Rozpocznij zmianę**.
 - Klawisz **1**: podejdź do podajnika i pobierz rudę.
@@ -27,7 +38,7 @@ Myszą wybierasz stację, a w panelu **Stacja** wskazujesz odbiór lub odłożen
 
 WASD lub strzałki poruszają o jedno pole; **E** wykonuje domyślną akcję wybranej stacji; **Spacja** pauzuje; **Tab** zmienia panel; **Esc** anuluje ustawianie budynku. **Jak grać** otwiera instrukcję.
 
-## Zakres tej wersji
+### Zakres hali Echo
 
 - Jedna hala 14 × 9 pól, podajnik, prasa, wysyłka.
 - Oddzielne wejście i wyjście prasy; automatyczna produkcja z zapasu i rezerwacja miejsca na gotowy produkt.
@@ -39,7 +50,7 @@ WASD lub strzałki poruszają o jedno pole; **E** wykonuje domyślną akcję wyb
 - Dwa deterministyczne testy autonomii bez Operatora i Autoloop aktywnej hali.
 - Credits wypłacane za pełne zmiany, przerwanie bez częściowej wypłaty, lokalny zapis i kopia poprzedniej generacji.
 
-## Ważne zasady
+### Ważne zasady hali Echo
 
 Początkowe **200 Credits**, ceny ulepszeń, pojemności **4 sztuki**, udźwig **1**, ruch **0,5 s/pole**, obsługa **1 s**, prasa **4 s** i minimalny cel autonomii **1 płyta/zmianę** są parametrami testowymi, a nie finalnym balansem. Linia bazowa działa bez zakupów. Podajnik startuje z 3 sztukami i uzupełnia jedną co 4 sekundy do swojej pojemności.
 
@@ -47,7 +58,7 @@ Każda zmiana resetuje zapasy, pozycje i pracę maszyn. Budynki, ulepszenia i Cr
 
 Przeniesienie budynku **nie przelicza starych tras**. Ich czas i jawne pola pozostają zapisane. Zmiana układu, ulepszenie, przełączenie Echo lub aktualizacja profilu unieważnia certyfikat. Trzeba sprawdzić wynik i w razie potrzeby nagrać zadanie ponownie. Dawne Echo nie przejmują automatycznie nowych szybkości. Jawna zmiana profilu zachowuje terminy komend; nowe nagranie w pełni wykorzystuje krótsze czasy.
 
-## Zapis
+### Zapis hali Echo
 
 Plik `echo-factory-v1.json` jest przechowywany w `Application.persistentDataPath`. Dla Windows i ustawień tego projektu jest to zwykle `%USERPROFILE%\AppData\LocalLow\EchoFactory\EchoFactory`. Zapis tworzy plik tymczasowy i atomowo zastępuje poprzedni, zachowując `.bak`. Nieobsługiwana wersja lub uszkodzone dane blokują nadpisanie. Ekran błędu umożliwia odzyskanie poprawnej kopii, zachowując uszkodzony oryginał osobno.
 
@@ -56,6 +67,8 @@ Certyfikat wymaga nowego testu po uruchomieniu gry. Autoloop działa podczas akt
 ## Testy
 
 **Wykonane w środowisku bez Unity:** kompilacja kodu Core i testów kompilatorem Roslyn z .NET 8, uruchomienie 1000 deterministycznych powtórek oraz testów magazynów, transferu, konfliktu, ulepszeń, zmiany układu, autonomii, zastępowania i wypłat. Wynik i ograniczenia: [docs/VALIDATION.md](docs/VALIDATION.md).
+
+Poza Unity: `dotnet run --project Tests/CoreRunner` (logika) oraz `dotnet build Tests/UnityCompileCheck` (przybliżona kompilacja skryptów Runtime na bibliotekach Unity 2021.3). To samo uruchamia GitHub Actions („Testy”) przy każdym pushu.
 
 W Unity: **Echo Factory → Uruchom testy logiki**. Wynik pojawi się w Console, a nie w oknie Unity Test Runner. To ten sam zestaw testów, bez dodatkowych pakietów.
 
@@ -71,7 +84,9 @@ dotnet run --project Tests/CoreRunner/CoreRunner.csproj --configuration Release 
 ## Struktura i kolejny krok
 
 - `Assets/EchoFactory/Core`: dane, deterministyczna ścieżka BFS, tick 20 Hz, nagrania, ekonomia i planowanie.
-- `Assets/EchoFactory/Runtime`: scena schematyczna, wejście przez IMGUI, adapter zapisu.
+- `Assets/EchoFactory/Runtime`: `GameUI` (UI Toolkit, warstwa strategiczna), `FactoryGame` (hala Echo, jeszcze IMGUI), adapter zapisu.
+- `Assets/EchoFactory/Resources/UI`: układ (UXML) i wygląd (USS) do edycji w UI Builder; `Assets/EchoFactory/Art`: obrazki.
+- `docs/TASKS.md`: lista zadań do grywalnej wersji.
 - `Assets/EchoFactory/Editor`: menu uruchomienia, testów i opcjonalnego buildu Windows.
 - `Assets/EchoFactory/Tests`: wspólne testy C#, dostępne także poza edytorem.
 - `docs/DESIGN.md`: przyjęte decyzje i doprecyzowania do tej implementacji.

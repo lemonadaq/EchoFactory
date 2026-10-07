@@ -9,14 +9,22 @@ namespace EchoFactory.Editor
     public static class PrototypeTools
     {
         private const string ScenePath = "Assets/EchoFactory/Scenes/Factory.unity";
+        private const string LayoutPath = "Assets/EchoFactory/Resources/UI/Game.uxml";
         [MenuItem("Echo Factory/Otwórz halę")]
         public static void OpenHall()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             EditorSceneManager.OpenScene(ScenePath);
         }
+        [MenuItem("Echo Factory/Edytuj wygląd gry (UI Builder)")]
+        public static void OpenLayout()
+        {
+            var layout = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>(LayoutPath);
+            if (layout == null) { Debug.LogError("Nie znaleziono " + LayoutPath); return; }
+            AssetDatabase.OpenAsset(layout);
+        }
         [MenuItem("Echo Factory/Uruchom testy logiki")]
-        public static void RunChecks() { Debug.Log(CoreChecks.Run()); }
+        public static void RunChecks() { Debug.Log(CoreChecks.Run()); Debug.Log("PASS: " + StrategyChecks.Run() + " strategic assertions."); }
         // Optional command-line gate: -batchmode -nographics -projectPath ... -executeMethod EchoFactory.Editor.PrototypeTools.CheckBatch -logFile ...
         public static void CheckBatch()
         {

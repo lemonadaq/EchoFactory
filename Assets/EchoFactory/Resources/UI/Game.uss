@@ -1,0 +1,130 @@
+/* Echo Factory — wygląd całej gry.
+   Kolory zmieniasz w jednym miejscu (:root), resztę w UI Builder (Window > UI Toolkit > UI Builder). */
+:root {
+    --c-bg: #EBEDE8;
+    --c-panel: #FAFAF6;
+    --c-ink: #1F2629;
+    --c-muted: #5E6662;
+    --c-line: #A8B0A9;
+    --c-accent: #146B6E;
+    --c-accent-light: #D6E8E6;
+    --c-amber: #AD6E1F;
+    --c-amber-light: #F3E6D2;
+    --c-disabled: #C9CDC8;
+}
+
+.root { flex-grow: 1; background-color: var(--c-bg); color: var(--c-ink); font-size: 16px; }
+.hidden { display: none; }
+
+/* ---------- Tekst ---------- */
+.title { font-size: 44px; -unity-font-style: bold; color: var(--c-accent); }
+.h1 { font-size: 26px; -unity-font-style: bold; }
+.h2 { font-size: 18px; -unity-font-style: bold; }
+.body { font-size: 16px; white-space: normal; }
+.small { font-size: 13px; white-space: normal; color: var(--c-muted); }
+.accent { color: var(--c-accent); }
+.amber { color: var(--c-amber); }
+
+/* ---------- Przyciski ---------- */
+.btn {
+    font-size: 15px; -unity-font-style: bold; color: var(--c-ink);
+    background-color: #D2D7D3; border-width: 0; border-radius: 6px;
+    padding: 8px 14px; margin: 4px; min-height: 38px;
+    transition-duration: 0.12s;
+}
+.btn:hover { background-color: #C1C8C3; }
+.btn:active { background-color: #AEB7B1; }
+.btn--primary { background-color: var(--c-accent); color: #FFFFFF; }
+.btn--primary:hover { background-color: #0F5A5C; }
+.btn:disabled { background-color: var(--c-disabled); color: #8B918D; opacity: 1; }
+.btn--selected { background-color: var(--c-accent-light); border-width: 2px; border-color: var(--c-accent); }
+
+/* ---------- Panele ---------- */
+.panel {
+    background-color: var(--c-panel); border-radius: 8px; padding: 18px;
+    border-width: 1px; border-color: #D9DDD7; margin: 6px;
+}
+.screen { flex-grow: 1; padding: 20px 30px; }
+.row { flex-direction: row; align-items: center; }
+.col { flex-direction: column; }
+.grow { flex-grow: 1; }
+.spacer { flex-grow: 1; }
+
+/* ---------- Menu ---------- */
+.menu { justify-content: center; padding-left: 100px; }
+.menu__card { width: 760px; margin-top: 30px; }
+.menu__tagline { font-size: 24px; -unity-font-style: bold; margin-top: 6px; }
+
+/* ---------- Pasek górny ---------- */
+.top-bar {
+    flex-direction: row; align-items: center; padding: 10px 30px;
+    background-color: var(--c-panel); border-bottom-width: 1px; border-color: #D9DDD7;
+}
+.top-bar__brand { font-size: 22px; -unity-font-style: bold; color: var(--c-accent); margin-right: 24px; }
+.top-bar__credits { font-size: 24px; -unity-font-style: bold; color: var(--c-amber); margin-left: 16px; margin-right: 16px; }
+.top-bar__stock { font-size: 13px; margin-right: 16px; }
+
+/* ---------- Mapa ---------- */
+.parcel-grid { flex-direction: row; flex-wrap: wrap; width: 720px; }
+.parcel-card { width: 222px; height: 150px; margin: 6px; padding: 12px; }
+.parcel-card--owned { border-color: var(--c-accent); border-width: 2px; }
+.parcel-card--selected { background-color: var(--c-accent-light); }
+.parcel-card__name { font-size: 17px; -unity-font-style: bold; }
+.parcel-card__resource { font-size: 15px; margin-top: 4px; }
+
+/* ---------- Karty listy ---------- */
+.card { flex-direction: row; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.card__text { flex-grow: 1; flex-shrink: 1; }
+
+/* ---------- Hala ---------- */
+.hall-layout { flex-direction: row; flex-grow: 1; }
+.flow-column { width: 220px; }
+.resource-box {
+    background-color: var(--c-panel); border-width: 3px; border-color: var(--c-accent);
+    border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;
+}
+.resource-box--waste { border-color: var(--c-amber); }
+.resource-box__name { font-size: 15px; -unity-font-style: bold; }
+.resource-box__amount { font-size: 20px; -unity-font-style: bold; color: var(--c-accent); }
+
+.hall-floor {
+    flex-grow: 1; margin: 0 18px; border-width: 3px; border-color: var(--c-line); border-radius: 6px;
+    background-color: #F4F5F1;
+}
+.hall-floor--placing { border-color: var(--c-accent); background-color: #E8F2F0; }
+.hall-floor__caption { position: absolute; left: 16px; top: 10px; }
+
+.machine {
+    position: absolute; width: 120px; height: 120px;
+    translate: -50% -50%;
+    align-items: center; justify-content: flex-end;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: scale-to-fit;
+    border-radius: 10px; border-width: 0; border-color: var(--c-accent);
+}
+.machine:hover { border-width: 2px; }
+.machine--selected { border-width: 3px; background-color: var(--c-accent-light); }
+.machine--disabled { opacity: 0.45; }
+.machine__label {
+    font-size: 11px; -unity-font-style: bold; -unity-text-align: middle-center;
+    background-color: rgba(250, 250, 246, 0.9); border-radius: 4px; padding: 1px 6px; margin-bottom: -18px;
+}
+
+/* Obrazki maszyn: podmień plik PNG albo zmień ścieżkę w UI Builder. */
+.machine--BasicPress { background-image: url("../../Art/Machines/BasicPress.png"); }
+.machine--ImprovedPress { background-image: url("../../Art/Machines/ImprovedPress.png"); }
+.machine--HighSpeedPress { background-image: url("../../Art/Machines/HighSpeedPress.png"); }
+.machine--Recycler { background-image: url("../../Art/Machines/Recycler.png"); }
+.machine--Generator { background-image: url("../../Art/Machines/Generator.png"); }
+.machine--ElectronicsAssembler { background-image: url("../../Art/Machines/ElectronicsAssembler.png"); }
+
+.side-panel { width: 360px; }
+.shop-item { flex-direction: row; align-items: center; }
+.shop-item__icon { width: 44px; height: 44px; -unity-background-scale-mode: scale-to-fit; margin-right: 6px; }
+
+/* ---------- Komunikat ---------- */
+.toast {
+    position: absolute; left: 30px; right: 30px; bottom: 12px;
+    font-size: 15px; color: var(--c-accent); -unity-font-style: bold; white-space: normal;
+}
+.toast--warning { color: var(--c-amber); }

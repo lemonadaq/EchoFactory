@@ -1,0 +1,20 @@
+name: Testy
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Testy logiki (Core + strategia)
+        run: dotnet run --project Tests/CoreRunner
+      - name: Kompilacja skryptów Runtime (przybliżona, biblioteki Unity 2021.3)
+        run: dotnet build Tests/UnityCompileCheck -nologo
