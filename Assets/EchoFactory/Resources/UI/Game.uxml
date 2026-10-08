@@ -12,6 +12,7 @@
                 <ui:Label text="PROTOTYP — WARSTWA STRATEGICZNA" class="h2 accent" />
                 <ui:Label text="Kupuj działki, rozwijaj hale, badaj technologie, ustawiaj maszyny i kończ tury. Każda decyzja zmienia przepływ surowców, energii, złomu i gotowych produktów." class="body" style="margin-top: 12px; margin-bottom: 18px;" />
                 <ui:VisualElement class="row">
+                    <ui:Button name="btn-continue" text="KONTYNUUJ" class="btn btn--primary" style="width: 260px; height: 52px;" />
                     <ui:Button name="btn-new-game" text="NOWA GRA" class="btn btn--primary" style="width: 260px; height: 52px;" />
                     <ui:Button name="btn-echo-hall" text="PROTOTYP HALI ECHO" class="btn" style="width: 260px; height: 52px;" />
                 </ui:VisualElement>

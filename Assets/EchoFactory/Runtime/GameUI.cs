@@ -106,6 +106,7 @@ namespace EchoFactory.Runtime
             root.style.flexGrow = 1;
 
             Click("btn-new-game", NewGame);
+            Click("btn-continue", Continue);
             Click("btn-echo-hall", OpenEchoHall);
             Click("nav-map", () => Show(Screen.Map));
             Click("nav-facility", () => Show(Screen.Facility));
@@ -166,6 +167,24 @@ namespace EchoFactory.Runtime
             placing = null;
             Message("Nowa gra. Masz jedną działkę i halę produkcyjną z prasą podstawową.");
             Show(Screen.Map);
+        }
+
+        private void Continue()
+        {
+            try { state = StrategicSaveStore.Load(); }
+            catch (Exception e) { Message("Nie wczytano zapisu: " + e.Message, true); Refresh(); return; }
+            selectedParcel = 0;
+            selectedFacility = state.Facilities.Count > 0 ? state.Facilities[0].Id : -1;
+            selectedMachine = -1;
+            placing = null;
+            Message("Wczytano grę — tura " + state.Turn + ".");
+            Show(state.Phase == StrategicPhase.Summary ? Screen.Summary : Screen.Map);
+        }
+
+        private void SaveGame()
+        {
+            try { StrategicSaveStore.Save(state); }
+            catch (Exception e) { Message("Błąd zapisu: " + e.Message, true); }
         }
 
         private void OpenEchoHall()
@@ -276,6 +295,7 @@ namespace EchoFactory.Runtime
         {
             if (state == null || state.Phase != StrategicPhase.Planning) return;
             TurnSystem.EndTurn(state);
+            SaveGame();
             Message("");
             Show(Screen.Summary);
         }
@@ -284,6 +304,7 @@ namespace EchoFactory.Runtime
         {
             if (state == null || state.Phase != StrategicPhase.Summary) return;
             TurnSystem.ContinueToPlanning(state);
+            SaveGame();
             Show(Screen.Map);
         }
 
@@ -293,6 +314,7 @@ namespace EchoFactory.Runtime
         {
             if (root == null) return;
             SetVisible("screen-menu", screen == Screen.Menu);
+            SetVisible("btn-continue", StrategicSaveStore.Exists());
             SetVisible("game", screen != Screen.Menu);
             SetVisible("screen-map", screen == Screen.Map);
             SetVisible("screen-facility", screen == Screen.Facility);

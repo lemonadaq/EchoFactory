@@ -132,6 +132,21 @@ namespace EchoFactory.Tests
             for(int t=0;t<20;t++){TurnSystem.EndTurn(loop); TurnSystem.ContinueToPlanning(loop); MarketSystem.Sell(loop,ResourceKind.FinishedGoods,loop.GetStock(ResourceKind.FinishedGoods)); Assert(loop.GetStock(ResourceKind.Steel)>0,ref assertions);}
             Assert(loop.Credits>10000,ref assertions);
 
+            // A04: save snapshot round-trip.
+            var sv=StrategicWorldGenerator.NewGame(77); sv.Credits=sv.Parcels[1].Price; ParcelSystem.Buy(sv,1);
+            MarketSystem.Sell(sv,ResourceKind.Steel,3); sv.AddStock(ResourceKind.Scrap,4);
+            TurnSystem.EndTurn(sv);
+            var snap=StrategicSave.From(sv); string why;
+            Assert(snap.Valid(out why) && snap.Stock.Count>0 && snap.LastMachineReports.Count==sv.LastMachineReports.Count,ref assertions);
+            var back=snap.ToState();
+            Assert(back.Turn==sv.Turn && back.Credits==sv.Credits && back.Phase==StrategicPhase.Summary && back.Parcels.Count==sv.Parcels.Count && back.Parcels[1].Owned,ref assertions);
+            Assert(back.GetStock(ResourceKind.Steel)==sv.GetStock(ResourceKind.Steel) && back.GetStock(ResourceKind.Scrap)==sv.GetStock(ResourceKind.Scrap) && back.GetSupply(ResourceKind.Steel)==sv.GetSupply(ResourceKind.Steel),ref assertions);
+            Assert(back.LastExtracted.Count==sv.LastExtracted.Count && back.LastMachineReports.Count==sv.LastMachineReports.Count && back.Facilities[0].Machines.Count==sv.Facilities[0].Machines.Count,ref assertions);
+            TurnSystem.ContinueToPlanning(back); TurnSystem.EndTurn(back);
+            Assert(back.Turn==sv.Turn+1,ref assertions);
+            var bad=StrategicSave.From(sv); bad.Version=99; Assert(!bad.Valid(out why),ref assertions);
+            var bad2=StrategicSave.From(sv); bad2.Facilities[0].ParcelId=50; Assert(!bad2.Valid(out why),ref assertions);
+
             return assertions;
         }
 

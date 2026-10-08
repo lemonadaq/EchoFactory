@@ -32,3 +32,9 @@ Niesprawdzone: wygląd i działanie ekranu rynku w Unity; `MarketSupply` nie jes
 Zmieniono: `MachineReport`/`IdleReason` w `ProductionSystem` (powód bezczynności każdej maszyny), `LastMachineReports` w stanie i `TurnSystem`, sekcja „Wąskie gardła” w podsumowaniu (`GameUI.cs`), testy w `StrategyChecks`, docs.
 Sprawdzono: CoreRunner, UnityCompileCheck (wyniki poniżej w commicie). Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: wygląd podsumowania w Unity; `LastMachineReports` nie jest serializowany (A04); werdykt „SYSTEM DZIAŁA” nadal opiera się na produkcji > 0.
+
+## 2026-10-08 — A04
+
+Zmieniono: `Core/StrategicSave.cs` (migawka stanu z walidacją, w tym raporty wąskich gardeł, podaż rynku, ostatnie wydobycie), `Runtime/StrategicSaveStore.cs` (zapis atomowy + `.bak`), przycisk „KONTYNUUJ” (`Game.uxml`, `GameUI.cs`), zapis po każdej turze, testy round-trip w `StrategyChecks`, docs.
+Sprawdzono: CoreRunner (2139 + 130 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: faktyczny zapis/odczyt JsonUtility w Unity (test Core nie używa JsonUtility); wygląd przycisku w menu; komunikat o błędzie wczytania na ekranie menu (etykieta `lbl-message` może być ukryta w menu); zapis nie obejmuje Hali Echo.
