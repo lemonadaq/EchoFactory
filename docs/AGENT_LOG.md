@@ -38,3 +38,9 @@ Niesprawdzone: wygląd podsumowania w Unity; `LastMachineReports` nie jest seria
 Zmieniono: `Core/StrategicSave.cs` (migawka stanu z walidacją, w tym raporty wąskich gardeł, podaż rynku, ostatnie wydobycie), `Runtime/StrategicSaveStore.cs` (zapis atomowy + `.bak`), przycisk „KONTYNUUJ” (`Game.uxml`, `GameUI.cs`), zapis po każdej turze, testy round-trip w `StrategyChecks`, docs.
 Sprawdzono: CoreRunner (2139 + 130 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: faktyczny zapis/odczyt JsonUtility w Unity (test Core nie używa JsonUtility); wygląd przycisku w menu; komunikat o błędzie wczytania na ekranie menu (etykieta `lbl-message` może być ukryta w menu); zapis nie obejmuje Hali Echo.
+
+## 2026-10-08 — A05
+
+Zmieniono: `Core/GoalSystem.cs` (cel 50 000 C, bankructwo po 2 turach ujemnego salda), `Outcome`/`DebtTurns` w `StrategicState` i `StrategicSave` (bez zmiany wersji — stare zapisy czytają się jako „gra trwa”), blokada `EndTurn`/`ContinueToPlanning` po końcu gry, ekran końca gry (`Game.uxml`, `GameUI.cs`), cel i ostrzeżenie o długu w podsumowaniu, testy w `StrategyChecks`.
+Sprawdzono: CoreRunner (2139 + 140 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: wygląd i przepływ ekranu końca gry w Unity; zapis końcowego stanu pozwala „Kontynuuj” trafić prosto na ekran końca; osiągalność celu 50 000 C i balans (A09); kontrakty nie zostały zrobione.

@@ -13,7 +13,7 @@ namespace EchoFactory.Runtime
     /// </summary>
     public sealed class GameUI : MonoBehaviour
     {
-        private enum Screen { Menu, Map, Facility, Hall, Research, Market, Summary }
+        private enum Screen { Menu, Map, Facility, Hall, Research, Market, Summary, End }
 
         [Header("Opcjonalne — puste pola są ładowane z Resources/UI")]
         [SerializeField] private VisualTreeAsset layout;
@@ -113,6 +113,7 @@ namespace EchoFactory.Runtime
             Click("nav-research", () => Show(Screen.Research));
             Click("nav-market", () => Show(Screen.Market));
             Click("btn-end-turn", EndTurn);
+            Click("btn-end-menu", () => { state = null; Show(Screen.Menu); });
             Click("btn-buy-parcel", BuyParcel);
             Click("btn-manage-parcel", () => Show(Screen.Facility));
             Click("btn-back-map", () => Show(Screen.Map));
@@ -178,7 +179,7 @@ namespace EchoFactory.Runtime
             selectedMachine = -1;
             placing = null;
             Message("Wczytano grę — tura " + state.Turn + ".");
-            Show(state.Phase == StrategicPhase.Summary ? Screen.Summary : Screen.Map);
+            Show(state.Outcome != GameOutcome.Playing ? Screen.End : state.Phase == StrategicPhase.Summary ? Screen.Summary : Screen.Map);
         }
 
         private void SaveGame()
@@ -303,6 +304,7 @@ namespace EchoFactory.Runtime
         private void NextTurn()
         {
             if (state == null || state.Phase != StrategicPhase.Summary) return;
+            if (state.Outcome != GameOutcome.Playing) { Show(Screen.End); return; }
             TurnSystem.ContinueToPlanning(state);
             SaveGame();
             Show(Screen.Map);
@@ -322,6 +324,7 @@ namespace EchoFactory.Runtime
             SetVisible("screen-research", screen == Screen.Research);
             SetVisible("screen-market", screen == Screen.Market);
             SetVisible("screen-summary", screen == Screen.Summary);
+            SetVisible("screen-end", screen == Screen.End);
             if (state == null) return;
 
             RefreshTopBar();
@@ -331,6 +334,7 @@ namespace EchoFactory.Runtime
             else if (screen == Screen.Research) RefreshResearch();
             else if (screen == Screen.Market) RefreshMarket();
             else if (screen == Screen.Summary) RefreshSummary();
+            else if (screen == Screen.End) RefreshEnd();
         }
 
         private void RefreshTopBar()
@@ -655,6 +659,18 @@ namespace EchoFactory.Runtime
             return text.Length > 0 ? text : "";
         }
 
+        private void RefreshEnd()
+        {
+            bool won = state.Outcome == GameOutcome.Won;
+            SetText("lbl-end-title", won ? "WYGRANA" : "BANKRUTOWAŁEŚ");
+            SetText("lbl-end-body", (won
+                ? "Twoja fabryka osiągnęła cel " + GoalSystem.WinCredits + " C."
+                : "Saldo było ujemne przez " + GoalSystem.BankruptcyTurns + " tury z rzędu.") +
+                "\n\nTura: " + state.Turn + " · Saldo: " + state.Credits + " C");
+            var title = Find<Label>("lbl-end-title");
+            if (title != null) { title.EnableInClassList("accent", won); title.EnableInClassList("amber", !won); }
+        }
+
         private void RefreshSummary()
         {
             SetText("lbl-summary-title", "PODSUMOWANIE TURY " + state.Turn);
@@ -665,7 +681,12 @@ namespace EchoFactory.Runtime
                 "Wydobycie: " + ExtractionText() + "\n\n" +
                 (BottleneckText().Length > 0 ? "Wąskie gardła:\n" + BottleneckText() + "\n\n" : "") +
                 "Stal: " + state.GetStock(ResourceKind.Steel) + " · Energia: " + state.GetStock(ResourceKind.Energy) + " · Złom: " + state.GetStock(ResourceKind.Scrap) + "\n\n" +
-                "Saldo: " + state.Credits + " C");
+                "Saldo: " + state.Credits + " C" +
+                (state.Outcome == GameOutcome.Playing
+                    ? "\nCel: " + GoalSystem.WinCredits + " C" + (state.DebtTurns > 0 ? " · UWAGA: saldo ujemne, bankructwo za " + (GoalSystem.BankruptcyTurns - state.DebtTurns) + " tur." : "")
+                    : "\nKONIEC GRY"));
+            var next = Find<Button>("btn-next-turn");
+            if (next != null) next.text = state.Outcome == GameOutcome.Playing ? "NASTĘPNA TURA" : "DALEJ";
             var verdict = Find<Label>("lbl-summary-verdict");
             if (verdict != null)
             {

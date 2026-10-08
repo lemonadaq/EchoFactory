@@ -147,6 +147,31 @@ namespace EchoFactory.Tests
             var bad=StrategicSave.From(sv); bad.Version=99; Assert(!bad.Valid(out why),ref assertions);
             var bad2=StrategicSave.From(sv); bad2.Facilities[0].ParcelId=50; Assert(!bad2.Valid(out why),ref assertions);
 
+            // A05: goal and bankruptcy.
+            var g=StrategicWorldGenerator.NewGame(3);
+            TurnSystem.EndTurn(g);
+            Assert(g.Outcome==GameOutcome.Playing && g.DebtTurns==0,ref assertions);
+            var win=StrategicWorldGenerator.NewGame(3); win.Credits=GoalSystem.WinCredits;
+            TurnSystem.EndTurn(win);
+            Assert(win.Outcome==GameOutcome.Won,ref assertions);
+            var wc=win.Copy(); Assert(wc.Outcome==GameOutcome.Won,ref assertions);
+            bool threw=false; try{TurnSystem.ContinueToPlanning(win);}catch(InvalidOperationException){threw=true;}
+            Assert(threw,ref assertions);
+            var debt=StrategicWorldGenerator.NewGame(3); debt.Credits=-5000;
+            TurnSystem.EndTurn(debt);
+            Assert(debt.Credits<0 && debt.DebtTurns==1 && debt.Outcome==GameOutcome.Playing,ref assertions);
+            TurnSystem.ContinueToPlanning(debt); debt.Credits=1000; TurnSystem.EndTurn(debt);
+            Assert(debt.DebtTurns==0,ref assertions);
+            TurnSystem.ContinueToPlanning(debt); debt.Credits=-5000; TurnSystem.EndTurn(debt);
+            TurnSystem.ContinueToPlanning(debt); debt.Credits=-5000; TurnSystem.EndTurn(debt);
+            Assert(debt.Outcome==GameOutcome.Lost && debt.DebtTurns==GoalSystem.BankruptcyTurns,ref assertions);
+            threw=false; try{TurnSystem.ContinueToPlanning(debt);}catch(InvalidOperationException){threw=true;}
+            Assert(threw,ref assertions);
+            var lostBack=StrategicSave.From(debt).ToState();
+            Assert(lostBack.Outcome==GameOutcome.Lost && lostBack.DebtTurns==debt.DebtTurns,ref assertions);
+            threw=false; try{TurnSystem.EndTurn(lostBack);}catch(InvalidOperationException){threw=true;}
+            Assert(threw,ref assertions);
+
             return assertions;
         }
 

@@ -16,6 +16,7 @@ namespace EchoFactory.Core
         {
             if(state==null)throw new ArgumentNullException("state");
             if(state.Phase!=StrategicPhase.Planning)throw new InvalidOperationException("Turn can only end from Planning phase.");
+            if(state.Outcome!=GameOutcome.Playing)throw new InvalidOperationException("The game is over.");
             state.Phase=StrategicPhase.Resolving;
             state.LastExtracted=ExtractionSystem.Extract(state);
             var production=ProductionSystem.Resolve(state);
@@ -26,6 +27,7 @@ namespace EchoFactory.Core
             int costs=BaseOperatingCost+state.Facilities.Count*50;
             state.Credits+=income-costs;
             state.LastTurnIncome=income; state.LastPassiveIncome=passiveIncome; state.LastTurnCosts=costs; state.LastTurnProduction=production.FinishedGoods; state.LastMachineReports=production.Reports;
+            GoalSystem.Evaluate(state);
             state.Phase=StrategicPhase.Summary;
             return new TurnResult{Turn=state.Turn,Income=income,PassiveIncome=passiveIncome,Costs=costs,Production=production.FinishedGoods,EndingCredits=state.Credits,SteelConsumed=production.SteelConsumed,EnergyConsumed=production.EnergyConsumed,ScrapGenerated=production.ScrapGenerated,ScrapRecycled=production.ScrapRecycled,EnergyGenerated=production.EnergyGenerated};
         }
@@ -34,6 +36,7 @@ namespace EchoFactory.Core
         {
             if(state==null)throw new ArgumentNullException("state");
             if(state.Phase!=StrategicPhase.Summary)throw new InvalidOperationException("A turn must be resolved before continuing.");
+            if(state.Outcome!=GameOutcome.Playing)throw new InvalidOperationException("The game is over.");
             state.Turn++; state.Phase=StrategicPhase.Planning;
         }
     }

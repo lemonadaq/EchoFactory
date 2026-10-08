@@ -150,6 +150,9 @@ Finished goods and scrap are sold by the player (not automatically); steel, ener
 ## Turn resolution
 Production, passive income, operating costs and resource changes resolve when the player ends the turn. The turn summary should explain **what happened to the factory**, not just show a single profit number.
 
+## Goal and game end
+The run is won when Credits reach 50 000 at the end of a turn. It is lost when Credits stay below zero at the end of two consecutive turns (bankruptcy). After either outcome the turn can no longer advance; the end screen returns to the main menu.
+
 ## Visual direction
 Use a lighter, readable industrial-management presentation rather than the dark prototype palette. Temporary geometry is acceptable until the systems are proven; final models can be introduced later without changing the Core state model.
 

@@ -15,6 +15,8 @@ namespace EchoFactory.Core
         public int Turn, Credits, NextFacilityId, NextMachineId;
         public StrategicPhase Phase;
         public int LastTurnIncome, LastTurnCosts, LastTurnProduction, LastPassiveIncome, LastResearchSpent;
+        public GameOutcome Outcome;
+        public int DebtTurns;
         public List<ParcelState> Parcels = new List<ParcelState>();
         public List<FacilityState> Facilities = new List<FacilityState>();
         public List<TechnologyState> Technologies = new List<TechnologyState>();
@@ -31,7 +33,7 @@ namespace EchoFactory.Core
             {
                 Turn = c.Turn, Credits = c.Credits, NextFacilityId = c.NextFacilityId, NextMachineId = c.NextMachineId, Phase = c.Phase,
                 LastTurnIncome = c.LastTurnIncome, LastTurnCosts = c.LastTurnCosts, LastTurnProduction = c.LastTurnProduction,
-                LastPassiveIncome = c.LastPassiveIncome, LastResearchSpent = c.LastResearchSpent,
+                LastPassiveIncome = c.LastPassiveIncome, LastResearchSpent = c.LastResearchSpent, Outcome = c.Outcome, DebtTurns = c.DebtTurns,
                 Parcels = c.Parcels, Facilities = c.Facilities, Technologies = c.Technologies
             };
             Pack(c.Stock, d.Stock); Pack(c.LastExtracted, d.LastExtracted); Pack(c.MarketSupply, d.MarketSupply);
@@ -66,7 +68,7 @@ namespace EchoFactory.Core
             {
                 Turn = Turn, Credits = Credits, NextFacilityId = NextFacilityId, NextMachineId = NextMachineId, Phase = Phase,
                 LastTurnIncome = LastTurnIncome, LastTurnCosts = LastTurnCosts, LastTurnProduction = LastTurnProduction,
-                LastPassiveIncome = LastPassiveIncome, LastResearchSpent = LastResearchSpent
+                LastPassiveIncome = LastPassiveIncome, LastResearchSpent = LastResearchSpent, Outcome = Outcome, DebtTurns = DebtTurns
             };
             for (int i = 0; i < Parcels.Count; i++) s.Parcels.Add(Parcels[i].Copy());
             for (int i = 0; i < Facilities.Count; i++) s.Facilities.Add(Facilities[i].Copy());

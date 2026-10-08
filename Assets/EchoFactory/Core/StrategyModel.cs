@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace EchoFactory.Core
 {
+    public enum GameOutcome { Playing, Won, Lost }
     public enum StrategicPhase { Planning, Resolving, Summary }
     public enum ResourceKind { None, Steel, Energy, Bitumen, Scrap, Electronics, FinishedGoods }
     public enum FacilityKind { Empty, ProductionHall, LogisticsHall, EnergyHall, Workshop, ResearchHall }
@@ -38,13 +39,14 @@ namespace EchoFactory.Core
         public int Turn=1, Credits=10000, NextFacilityId=1, NextMachineId=1;
         public StrategicPhase Phase=StrategicPhase.Planning;
         public int LastTurnIncome, LastTurnCosts, LastTurnProduction, LastPassiveIncome, LastResearchSpent;
+        public GameOutcome Outcome; public int DebtTurns;
         public List<ParcelState> Parcels=new List<ParcelState>(); public List<FacilityState> Facilities=new List<FacilityState>(); public List<TechnologyState> Technologies=new List<TechnologyState>(); public Dictionary<ResourceKind,int> Stock=new Dictionary<ResourceKind,int>(); public Dictionary<ResourceKind,int> LastExtracted=new Dictionary<ResourceKind,int>(); public Dictionary<ResourceKind,int> MarketSupply=new Dictionary<ResourceKind,int>(); public List<MachineReport> LastMachineReports=new List<MachineReport>();
         public int GetSupply(ResourceKind kind){int v;return MarketSupply.TryGetValue(kind,out v)?v:0;}
         public void SetSupply(ResourceKind kind,int value){int c=Math.Max(-MarketSystem.MaxSupply,Math.Min(MarketSystem.MaxSupply,value));if(c==0)MarketSupply.Remove(kind);else MarketSupply[kind]=c;}
         public int GetStock(ResourceKind kind){int v;return Stock.TryGetValue(kind,out v)?v:0;}
         public void AddStock(ResourceKind kind,int amount){if(kind!=ResourceKind.None&&amount!=0)Stock[kind]=GetStock(kind)+amount;}
         public bool HasTechnology(TechnologyKind kind){for(int i=0;i<Technologies.Count;i++)if(Technologies[i].Kind==kind)return Technologies[i].Unlocked;return false;}
-        public StrategicState Copy(){var c=new StrategicState{Turn=Turn,Credits=Credits,NextFacilityId=NextFacilityId,NextMachineId=NextMachineId,Phase=Phase,LastTurnIncome=LastTurnIncome,LastTurnCosts=LastTurnCosts,LastTurnProduction=LastTurnProduction,LastPassiveIncome=LastPassiveIncome,LastResearchSpent=LastResearchSpent};for(int i=0;i<Parcels.Count;i++)c.Parcels.Add(Parcels[i].Copy());for(int i=0;i<Facilities.Count;i++)c.Facilities.Add(Facilities[i].Copy());for(int i=0;i<Technologies.Count;i++)c.Technologies.Add(Technologies[i].Copy());foreach(var p in Stock)c.Stock[p.Key]=p.Value;foreach(var p in LastExtracted)c.LastExtracted[p.Key]=p.Value;foreach(var p in MarketSupply)c.MarketSupply[p.Key]=p.Value;c.LastMachineReports.AddRange(LastMachineReports);return c;}
+        public StrategicState Copy(){var c=new StrategicState{Turn=Turn,Credits=Credits,NextFacilityId=NextFacilityId,NextMachineId=NextMachineId,Phase=Phase,LastTurnIncome=LastTurnIncome,LastTurnCosts=LastTurnCosts,LastTurnProduction=LastTurnProduction,LastPassiveIncome=LastPassiveIncome,LastResearchSpent=LastResearchSpent,Outcome=Outcome,DebtTurns=DebtTurns};for(int i=0;i<Parcels.Count;i++)c.Parcels.Add(Parcels[i].Copy());for(int i=0;i<Facilities.Count;i++)c.Facilities.Add(Facilities[i].Copy());for(int i=0;i<Technologies.Count;i++)c.Technologies.Add(Technologies[i].Copy());foreach(var p in Stock)c.Stock[p.Key]=p.Value;foreach(var p in LastExtracted)c.LastExtracted[p.Key]=p.Value;foreach(var p in MarketSupply)c.MarketSupply[p.Key]=p.Value;c.LastMachineReports.AddRange(LastMachineReports);return c;}
     }
 
     public static class StrategicWorldGenerator

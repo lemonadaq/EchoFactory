@@ -134,6 +134,15 @@
                     <ui:Button name="btn-next-turn" text="NASTĘPNA TURA" class="btn btn--primary" style="width: 330px; height: 55px; margin-top: 30px;" />
                 </ui:VisualElement>
             </ui:VisualElement>
+
+            <!-- ---------- Koniec gry ---------- -->
+            <ui:VisualElement name="screen-end" class="screen">
+                <ui:VisualElement class="panel" style="width: 760px;">
+                    <ui:Label name="lbl-end-title" text="" class="title" />
+                    <ui:Label name="lbl-end-body" text="" class="body" style="margin-top: 14px; white-space: normal;" />
+                    <ui:Button name="btn-end-menu" text="MENU GŁÓWNE" class="btn btn--primary" style="width: 330px; height: 55px; margin-top: 30px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:Label name="lbl-message" text="" class="toast" picking-mode="Ignore" />
