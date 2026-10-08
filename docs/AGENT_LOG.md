@@ -20,3 +20,9 @@ Niesprawdzone: uruchomienie w Unity 6000.3.18f1 (U01).
 Zmieniono: nowy `Core/ExtractionSystem.cs` (wydobycie z działek + energia z sieci), wywołanie w `TurnSystem.EndTurn`, `LastExtracted` w stanie, działka startowa = stal, wiersz „Wydobycie” w podsumowaniu (`GameUI.cs`), testy w `StrategyChecks`, docs.
 Sprawdzono: CoreRunner (2139 + 82 asercji, w tym 20 tur startu bez martwego punktu), UnityCompileCheck. Brak otwartych issues od uprawnionych autorów (`authorAssociation` niedostępne w `gh issue list`, sprawdzono przez `gh api`).
 Niesprawdzone: wygląd podsumowania w Unity; `LastExtracted` nie jest jeszcze serializowany (A04); balans (A09).
+
+## 2026-10-08 — A02
+
+Zmieniono: nowy `Core/MarketSystem.cs` (ceny z podaży, kupno/sprzedaż, regeneracja co turę), `MarketSupply` w stanie, usunięta automatyczna sprzedaż produktów w `TurnSystem` (przychód = tylko pasywny), ekran „RYNEK” (`Game.uxml`, `MarketRow.uxml`, `GameUI.cs`), testy w `StrategyChecks` (poprzednie oczekiwane wartości przychodu 420 → 300 i 10220 → 10100 zmienione celowo wraz z regułą), docs.
+Sprawdzono: CoreRunner (2139 + 116 asercji, w tym 20 tur z ręczną sprzedażą), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: wygląd i działanie ekranu rynku w Unity; `MarketSupply` nie jest serializowany (A04); balans cen (A09); `LastTurnProduction` w podsumowaniu nie pokazuje już przychodu z produktów — wąskie gardło to A03.

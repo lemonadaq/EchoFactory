@@ -11,7 +11,6 @@ namespace EchoFactory.Core
     public static class TurnSystem
     {
         public const int BaseOperatingCost=150;
-        public const int ProductValue=120;
 
         public static TurnResult EndTurn(StrategicState state)
         {
@@ -22,8 +21,8 @@ namespace EchoFactory.Core
             var production=ProductionSystem.Resolve(state);
             int passiveIncome=0;
             for(int i=0;i<state.Facilities.Count;i++)if(state.Facilities[i].Unlocked)passiveIncome+=state.Facilities[i].PassiveIncomePerTurn;
-            int productionIncome=production.FinishedGoods*ProductValue;
-            int income=productionIncome+passiveIncome;
+            int income=passiveIncome; // finished goods are no longer sold automatically: see MarketSystem
+            MarketSystem.Recover(state);
             int costs=BaseOperatingCost+state.Facilities.Count*50;
             state.Credits+=income-costs;
             state.LastTurnIncome=income; state.LastPassiveIncome=passiveIncome; state.LastTurnCosts=costs; state.LastTurnProduction=production.FinishedGoods;

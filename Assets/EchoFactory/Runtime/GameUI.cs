@@ -13,7 +13,7 @@ namespace EchoFactory.Runtime
     /// </summary>
     public sealed class GameUI : MonoBehaviour
     {
-        private enum Screen { Menu, Map, Facility, Hall, Research, Summary }
+        private enum Screen { Menu, Map, Facility, Hall, Research, Market, Summary }
 
         [Header("Opcjonalne — puste pola są ładowane z Resources/UI")]
         [SerializeField] private VisualTreeAsset layout;
@@ -22,6 +22,7 @@ namespace EchoFactory.Runtime
         [SerializeField] private VisualTreeAsset resourceBox;
         [SerializeField] private VisualTreeAsset machineToken;
         [SerializeField] private VisualTreeAsset shopItem;
+        [SerializeField] private VisualTreeAsset marketRow;
         [SerializeField] private PanelSettings panelSettings;
 
         private UIDocument document;
@@ -84,6 +85,7 @@ namespace EchoFactory.Runtime
             if (resourceBox == null) resourceBox = Resources.Load<VisualTreeAsset>("UI/ResourceBox");
             if (machineToken == null) machineToken = Resources.Load<VisualTreeAsset>("UI/Machine");
             if (shopItem == null) shopItem = Resources.Load<VisualTreeAsset>("UI/ShopItem");
+            if (marketRow == null) marketRow = Resources.Load<VisualTreeAsset>("UI/MarketRow");
             if (panelSettings == null)
             {
                 panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
@@ -108,6 +110,7 @@ namespace EchoFactory.Runtime
             Click("nav-map", () => Show(Screen.Map));
             Click("nav-facility", () => Show(Screen.Facility));
             Click("nav-research", () => Show(Screen.Research));
+            Click("nav-market", () => Show(Screen.Market));
             Click("btn-end-turn", EndTurn);
             Click("btn-buy-parcel", BuyParcel);
             Click("btn-manage-parcel", () => Show(Screen.Facility));
@@ -295,6 +298,7 @@ namespace EchoFactory.Runtime
             SetVisible("screen-facility", screen == Screen.Facility);
             SetVisible("screen-hall", screen == Screen.Hall);
             SetVisible("screen-research", screen == Screen.Research);
+            SetVisible("screen-market", screen == Screen.Market);
             SetVisible("screen-summary", screen == Screen.Summary);
             if (state == null) return;
 
@@ -303,6 +307,7 @@ namespace EchoFactory.Runtime
             else if (screen == Screen.Facility) RefreshFacility();
             else if (screen == Screen.Hall) RefreshHall();
             else if (screen == Screen.Research) RefreshResearch();
+            else if (screen == Screen.Market) RefreshMarket();
             else if (screen == Screen.Summary) RefreshSummary();
         }
 
@@ -316,6 +321,8 @@ namespace EchoFactory.Runtime
             SetEnabled("nav-map", planning);
             SetEnabled("nav-facility", planning);
             SetEnabled("nav-research", planning);
+            SetEnabled("nav-market", planning);
+            Find<VisualElement>("nav-market")?.EnableInClassList("btn--selected", screen == Screen.Market);
             Find<VisualElement>("nav-map")?.EnableInClassList("btn--selected", screen == Screen.Map);
             Find<VisualElement>("nav-facility")?.EnableInClassList("btn--selected", screen == Screen.Facility || screen == Screen.Hall);
             Find<VisualElement>("nav-research")?.EnableInClassList("btn--selected", screen == Screen.Research);
@@ -541,6 +548,46 @@ namespace EchoFactory.Runtime
                     action.clicked += () => Research(k);
                 }
             }
+        }
+
+        private static readonly ResourceKind[] MarketGoods = { ResourceKind.Steel, ResourceKind.Energy, ResourceKind.Bitumen, ResourceKind.Electronics, ResourceKind.Scrap, ResourceKind.FinishedGoods };
+
+        private void RefreshMarket()
+        {
+            SetText("lbl-market-hint", "Ceny rosną, gdy kupujesz, i spadają, gdy sprzedajesz. Co turę wracają do normy. Gotowe produkty nie sprzedają się same.");
+            var list = Find<VisualElement>("market-list");
+            if (list == null) return;
+            list.Clear();
+            foreach (var kind in MarketGoods)
+            {
+                var row = Spawn(marketRow, list);
+                if (row == null) break;
+                bool canBuy = MarketSystem.CanBuyKind(kind);
+                SetLabel(row, "title", ResourceName(kind).ToUpperInvariant() + " · masz " + state.GetStock(kind));
+                SetLabel(row, "detail", canBuy ? "Kupno " + MarketSystem.BuyPrice(state, kind) + " C / szt." : "Sprzedaż " + MarketSystem.SellPrice(state, kind) + " C / szt.");
+                BindTrade(row, "buy-1", canBuy, "KUP 1", () => Trade(kind, 1, true), MarketSystem.CanBuy(state, kind, 1));
+                BindTrade(row, "buy-5", canBuy, "KUP 5", () => Trade(kind, 5, true), MarketSystem.CanBuy(state, kind, 5));
+                BindTrade(row, "sell-1", !canBuy, "SPRZEDAJ 1", () => Trade(kind, 1, false), MarketSystem.CanSell(state, kind, 1));
+                BindTrade(row, "sell-all", !canBuy, "SPRZEDAJ WSZYSTKO", () => Trade(kind, state.GetStock(kind), false), MarketSystem.CanSell(state, kind, state.GetStock(kind)));
+            }
+        }
+
+        private static void BindTrade(VisualElement row, string name, bool visible, string text, Action action, bool enabled)
+        {
+            var button = row.Q<Button>(name);
+            if (button == null) return;
+            SetVisible(button, visible);
+            button.text = text;
+            button.SetEnabled(enabled);
+            button.clicked += action;
+        }
+
+        private void Trade(ResourceKind kind, int amount, bool buy)
+        {
+            if (state == null) return;
+            bool ok = buy ? MarketSystem.Buy(state, kind, amount) : MarketSystem.Sell(state, kind, amount);
+            Message(ok ? "" : "Transakcja niemożliwa.", !ok);
+            Refresh();
         }
 
         private string ExtractionText()

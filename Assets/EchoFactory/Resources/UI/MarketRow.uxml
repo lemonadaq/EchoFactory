@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <!-- Wiersz rynku: nazwa i cena po lewej, przyciski kupna lub sprzedaży po prawej. -->
+    <Style src="Game.uss" />
+    <ui:VisualElement name="card" class="panel card">
+        <ui:VisualElement class="card__text">
+            <ui:Label name="title" text="STAL" class="h2" />
+            <ui:Label name="detail" text="Cena" class="small" />
+        </ui:VisualElement>
+        <ui:Button name="buy-1" text="KUP 1" class="btn" style="width: 150px;" />
+        <ui:Button name="buy-5" text="KUP 5" class="btn" style="width: 150px; margin-left: 6px;" />
+        <ui:Button name="sell-1" text="SPRZEDAJ 1" class="btn" style="width: 170px;" />
+        <ui:Button name="sell-all" text="SPRZEDAJ WSZYSTKO" class="btn" style="width: 230px; margin-left: 6px;" />
+    </ui:VisualElement>
+</ui:UXML>

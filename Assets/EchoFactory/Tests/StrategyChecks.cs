@@ -21,12 +21,12 @@ namespace EchoFactory.Tests
             Assert(a.Phase==StrategicPhase.Summary,ref assertions);
             Assert(result.Production==1,ref assertions);
             Assert(result.PassiveIncome==300,ref assertions);
-            Assert(result.Income==420,ref assertions);
+            Assert(result.Income==300,ref assertions);
             Assert(result.SteelConsumed==1 && result.EnergyConsumed==1,ref assertions);
             Assert(result.ScrapGenerated==1,ref assertions);
             Assert(a.GetStock(ResourceKind.FinishedGoods)==1,ref assertions);
             Assert(a.GetStock(ResourceKind.Scrap)==1,ref assertions);
-            Assert(a.Credits==10220,ref assertions);
+            Assert(a.Credits==10100,ref assertions);
             TurnSystem.ContinueToPlanning(a);
             Assert(a.Turn==2 && a.Phase==StrategicPhase.Planning,ref assertions);
 
@@ -86,6 +86,31 @@ namespace EchoFactory.Tests
             int before1=bought.GetStock(extra.Resource);
             ParcelSystem.Buy(bought,extra.Id); var mined=ExtractionSystem.Extract(bought);
             Assert(mined[extra.Resource]>=ExtractionSystem.YieldPerTurn(extra) && bought.GetStock(extra.Resource)>before1,ref assertions);
+
+            // A02: market prices follow supply; goods are no longer auto-sold.
+            var m=StrategicWorldGenerator.NewGame(1);
+            Assert(m.Credits==10000 && MarketSystem.BuyPrice(m,ResourceKind.Steel)>MarketSystem.SellPrice(m,ResourceKind.Steel),ref assertions);
+            Assert(!MarketSystem.CanBuy(m,ResourceKind.FinishedGoods,1) && !MarketSystem.CanSell(m,ResourceKind.Steel,1),ref assertions);
+            int steel0=m.GetStock(ResourceKind.Steel), p0=MarketSystem.BuyPrice(m,ResourceKind.Steel), quote=MarketSystem.BuyQuote(m,ResourceKind.Steel,3);
+            Assert(quote>=3*p0 && MarketSystem.Buy(m,ResourceKind.Steel,3),ref assertions);
+            Assert(m.Credits==10000-quote && m.GetStock(ResourceKind.Steel)==steel0+3,ref assertions);
+            Assert(MarketSystem.BuyPrice(m,ResourceKind.Steel)>p0,ref assertions);
+            m.AddStock(ResourceKind.FinishedGoods,4);
+            int s0=MarketSystem.SellPrice(m,ResourceKind.FinishedGoods), payout=MarketSystem.SellQuote(m,ResourceKind.FinishedGoods,4), cr=m.Credits;
+            Assert(payout<=4*s0 && payout>0 && MarketSystem.Sell(m,ResourceKind.FinishedGoods,4),ref assertions);
+            Assert(m.Credits==cr+payout && m.GetStock(ResourceKind.FinishedGoods)==0,ref assertions);
+            Assert(MarketSystem.SellPrice(m,ResourceKind.FinishedGoods)<s0,ref assertions);
+            Assert(!MarketSystem.Sell(m,ResourceKind.FinishedGoods,1),ref assertions);
+            var poorM=StrategicWorldGenerator.NewGame(1); poorM.Credits=10;
+            Assert(!MarketSystem.Buy(poorM,ResourceKind.Electronics,1) && poorM.Credits==10 && poorM.GetStock(ResourceKind.Electronics)==0,ref assertions);
+            m.AddStock(ResourceKind.Scrap,100); MarketSystem.Sell(m,ResourceKind.Scrap,100);
+            Assert(MarketSystem.SellPrice(m,ResourceKind.Scrap)>=1 && m.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply,ref assertions);
+            var cp=m.Copy(); Assert(cp.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply,ref assertions);
+            TurnSystem.EndTurn(m);
+            Assert(m.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply-1 && m.GetSupply(ResourceKind.Steel)==-2,ref assertions);
+            var loop=StrategicWorldGenerator.NewGame(12345);
+            for(int t=0;t<20;t++){TurnSystem.EndTurn(loop); TurnSystem.ContinueToPlanning(loop); MarketSystem.Sell(loop,ResourceKind.FinishedGoods,loop.GetStock(ResourceKind.FinishedGoods)); Assert(loop.GetStock(ResourceKind.Steel)>0,ref assertions);}
+            Assert(loop.Credits>10000,ref assertions);
 
             return assertions;
         }

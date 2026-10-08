@@ -144,6 +144,9 @@ Each parcel has price, size, primary resource, resource richness, logistics bonu
 ## Extraction
 At the start of turn resolution every owned parcel mines its primary resource: `richness / 20` units (min. 1). An owned parcel with a facility also draws 1 Energy from the grid. The starter parcel is always Steel, so the starter press can run indefinitely; other resources require buying matching parcels.
 
+## Market
+Finished goods and scrap are sold by the player (not automatically); steel, energy, bitumen and electronics can be bought. Each resource has a supply level (-10..10) that sets its price (±5% per level around a base price); buying lowers supply (price up), selling raises it (price down), and every turn supply drifts one step back to 0. Buying costs 10% above and selling pays 10% below the mid price, and the price shifts after every unit in a batch. The Market screen is available during planning.
+
 ## Turn resolution
 Production, passive income, operating costs and resource changes resolve when the player ends the turn. The turn summary should explain **what happened to the factory**, not just show a single profit number.
 

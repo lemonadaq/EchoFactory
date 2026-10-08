@@ -26,6 +26,7 @@
                 <ui:Button name="nav-map" text="MAPA" class="btn" />
                 <ui:Button name="nav-facility" text="KONSTRUKCJE" class="btn" />
                 <ui:Button name="nav-research" text="R&amp;D" class="btn" />
+                <ui:Button name="nav-market" text="RYNEK" class="btn" />
                 <ui:VisualElement class="spacer" />
                 <ui:Label name="lbl-turn" text="TURA 1 · PLANOWANIE" class="h2" />
                 <ui:Label name="lbl-credits" text="10000 C" class="top-bar__credits" />
@@ -111,6 +112,13 @@
                     <ui:Label name="lbl-lab-info" text="7500 C · jedna na całą sieć. Odblokowuje drzewo R&amp;D." class="body" style="margin-top: 8px; margin-bottom: 12px;" />
                     <ui:Button name="btn-build-lab" text="ZBUDUJ HALĘ BADAWCZĄ" class="btn btn--primary" />
                 </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ---------- Rynek ---------- -->
+            <ui:VisualElement name="screen-market" class="screen">
+                <ui:Label text="RYNEK" class="h1" />
+                <ui:Label name="lbl-market-hint" text="" class="body" style="margin-bottom: 8px;" />
+                <ui:VisualElement name="market-list" />
             </ui:VisualElement>
 
             <!-- ---------- Podsumowanie tury ---------- -->
