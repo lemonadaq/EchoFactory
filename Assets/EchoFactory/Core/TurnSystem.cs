@@ -25,7 +25,7 @@ namespace EchoFactory.Core
             MarketSystem.Recover(state);
             int costs=BaseOperatingCost+state.Facilities.Count*50;
             state.Credits+=income-costs;
-            state.LastTurnIncome=income; state.LastPassiveIncome=passiveIncome; state.LastTurnCosts=costs; state.LastTurnProduction=production.FinishedGoods;
+            state.LastTurnIncome=income; state.LastPassiveIncome=passiveIncome; state.LastTurnCosts=costs; state.LastTurnProduction=production.FinishedGoods; state.LastMachineReports=production.Reports;
             state.Phase=StrategicPhase.Summary;
             return new TurnResult{Turn=state.Turn,Income=income,PassiveIncome=passiveIncome,Costs=costs,Production=production.FinishedGoods,EndingCredits=state.Credits,SteelConsumed=production.SteelConsumed,EnergyConsumed=production.EnergyConsumed,ScrapGenerated=production.ScrapGenerated,ScrapRecycled=production.ScrapRecycled,EnergyGenerated=production.EnergyGenerated};
         }

@@ -65,6 +65,26 @@ namespace EchoFactory.Tests
             Assert(chain.FinishedGoods==2,ref assertions);
             Assert(before-synergy.GetStock(ResourceKind.Energy)==1,ref assertions);
 
+            // A03: bottleneck report gives a reason for every machine that did not work.
+            var bn=StrategicWorldGenerator.NewGame(31);
+            bn.Facilities[0].Machines[0].Kind=MachineKind.BasicPress;
+            bn.Stock[ResourceKind.Steel]=0; bn.Stock[ResourceKind.Energy]=5;
+            var rNoSteel=ProductionSystem.Resolve(bn);
+            Assert(rNoSteel.Reports.Count==1 && rNoSteel.Reports[0].Reason==IdleReason.NoSteel && !rNoSteel.Reports[0].Worked,ref assertions);
+            bn.Stock[ResourceKind.Steel]=3; bn.Stock[ResourceKind.Energy]=0;
+            Assert(ProductionSystem.Resolve(bn).Reports[0].Reason==IdleReason.NoEnergy,ref assertions);
+            bn.Stock[ResourceKind.Energy]=2;
+            Assert(ProductionSystem.Resolve(bn).Reports[0].Worked,ref assertions);
+            bn.Facilities[0].Machines[0].Enabled=false;
+            Assert(ProductionSystem.Resolve(bn).Reports[0].Reason==IdleReason.Disabled,ref assertions);
+            bn.Facilities[0].Machines[0].Enabled=true; bn.Facilities[0].Machines[0].Kind=MachineKind.Recycler;
+            Assert(ProductionSystem.Resolve(bn).Reports[0].Reason==IdleReason.MissingTechnology,ref assertions);
+            bn.Facilities[0].Machines[0].Kind=MachineKind.Generator; bn.Stock[ResourceKind.Bitumen]=0;
+            Assert(ProductionSystem.Resolve(bn).Reports[0].Reason==IdleReason.NoBitumen,ref assertions);
+            var bnTurn=StrategicWorldGenerator.NewGame(31);
+            TurnSystem.EndTurn(bnTurn);
+            Assert(bnTurn.LastMachineReports.Count==1 && bnTurn.LastMachineReports[0].Worked,ref assertions);
+
             // A01: extraction keeps the starter strategy alive and never produces from nothing.
             var mine=StrategicWorldGenerator.NewGame(12345);
             Assert(mine.Parcels[0].Resource==ResourceKind.Steel,ref assertions);

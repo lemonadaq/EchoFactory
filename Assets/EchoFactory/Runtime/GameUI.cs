@@ -610,6 +610,29 @@ namespace EchoFactory.Runtime
             }
         }
 
+        private static string IdleText(IdleReason reason)
+        {
+            switch (reason)
+            {
+                case IdleReason.Disabled: return "wyłączona";
+                case IdleReason.MissingTechnology: return "brak technologii";
+                case IdleReason.NoSteel: return "brak stali";
+                case IdleReason.NoEnergy: return "brak energii";
+                case IdleReason.NoBitumen: return "brak bitumu";
+                case IdleReason.NoScrap: return "brak złomu";
+                case IdleReason.NoElectronics: return "brak elektroniki";
+                default: return "";
+            }
+        }
+
+        private string BottleneckText()
+        {
+            string text = "";
+            foreach (var r in state.LastMachineReports)
+                if (!r.Worked) text += (text.Length > 0 ? "\n" : "") + "• " + r.Kind + " #" + r.MachineId + ": " + IdleText(r.Reason);
+            return text.Length > 0 ? text : "";
+        }
+
         private void RefreshSummary()
         {
             SetText("lbl-summary-title", "PODSUMOWANIE TURY " + state.Turn);
@@ -618,6 +641,7 @@ namespace EchoFactory.Runtime
                 "Przychód: +" + state.LastTurnIncome + " C (w tym pasywny +" + state.LastPassiveIncome + " C)\n" +
                 "Koszt operacyjny: -" + state.LastTurnCosts + " C\n" +
                 "Wydobycie: " + ExtractionText() + "\n\n" +
+                (BottleneckText().Length > 0 ? "Wąskie gardła:\n" + BottleneckText() + "\n\n" : "") +
                 "Stal: " + state.GetStock(ResourceKind.Steel) + " · Energia: " + state.GetStock(ResourceKind.Energy) + " · Złom: " + state.GetStock(ResourceKind.Scrap) + "\n\n" +
                 "Saldo: " + state.Credits + " C");
             var verdict = Find<Label>("lbl-summary-verdict");

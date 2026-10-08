@@ -26,3 +26,9 @@ Niesprawdzone: wygląd podsumowania w Unity; `LastExtracted` nie jest jeszcze se
 Zmieniono: nowy `Core/MarketSystem.cs` (ceny z podaży, kupno/sprzedaż, regeneracja co turę), `MarketSupply` w stanie, usunięta automatyczna sprzedaż produktów w `TurnSystem` (przychód = tylko pasywny), ekran „RYNEK” (`Game.uxml`, `MarketRow.uxml`, `GameUI.cs`), testy w `StrategyChecks` (poprzednie oczekiwane wartości przychodu 420 → 300 i 10220 → 10100 zmienione celowo wraz z regułą), docs.
 Sprawdzono: CoreRunner (2139 + 116 asercji, w tym 20 tur z ręczną sprzedażą), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: wygląd i działanie ekranu rynku w Unity; `MarketSupply` nie jest serializowany (A04); balans cen (A09); `LastTurnProduction` w podsumowaniu nie pokazuje już przychodu z produktów — wąskie gardło to A03.
+
+## 2026-10-08 — A03
+
+Zmieniono: `MachineReport`/`IdleReason` w `ProductionSystem` (powód bezczynności każdej maszyny), `LastMachineReports` w stanie i `TurnSystem`, sekcja „Wąskie gardła” w podsumowaniu (`GameUI.cs`), testy w `StrategyChecks`, docs.
+Sprawdzono: CoreRunner, UnityCompileCheck (wyniki poniżej w commicie). Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: wygląd podsumowania w Unity; `LastMachineReports` nie jest serializowany (A04); werdykt „SYSTEM DZIAŁA” nadal opiera się na produkcji > 0.

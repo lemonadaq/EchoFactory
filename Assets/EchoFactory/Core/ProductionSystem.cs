@@ -2,8 +2,19 @@ using System;
 
 namespace EchoFactory.Core
 {
+    public enum IdleReason { None, Disabled, MissingTechnology, NoSteel, NoEnergy, NoBitumen, NoScrap, NoElectronics }
+
+    public sealed class MachineReport
+    {
+        public int MachineId, FacilityId;
+        public MachineKind Kind;
+        public IdleReason Reason; // None = machine worked this turn
+        public bool Worked { get { return Reason == IdleReason.None; } }
+    }
+
     public sealed class ProductionResult
     {
+        public System.Collections.Generic.List<MachineReport> Reports = new System.Collections.Generic.List<MachineReport>();
         public int FinishedGoods;
         public int SteelConsumed;
         public int EnergyConsumed;
@@ -72,14 +83,17 @@ namespace EchoFactory.Core
                 for (int j=0;j<facility.Machines.Count;j++)
                 {
                     var machine = facility.Machines[j];
-                    if (!machine.Enabled || !IsMachineUnlocked(state, machine.Kind)) continue;
-                    ResolveMachine(state, facility, machine, result);
+                    var report = new MachineReport { MachineId = machine.Id, FacilityId = facility.Id, Kind = machine.Kind };
+                    if (!machine.Enabled) report.Reason = IdleReason.Disabled;
+                    else if (!IsMachineUnlocked(state, machine.Kind)) report.Reason = IdleReason.MissingTechnology;
+                    else report.Reason = ResolveMachine(state, facility, machine, result);
+                    result.Reports.Add(report);
                 }
             }
             return result;
         }
 
-        static void ResolveMachine(StrategicState state, FacilityState facility, MachineState machine, ProductionResult result)
+        static IdleReason ResolveMachine(StrategicState state, FacilityState facility, MachineState machine, ProductionResult result)
         {
             int richness = ParcelRichness(state, facility.ParcelId);
             int logistics = ParcelLogistics(state, facility.ParcelId);
@@ -87,31 +101,45 @@ namespace EchoFactory.Core
             switch (machine.Kind)
             {
                 case MachineKind.BasicPress:
-                    if (state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < 1) return;
+                    { var miss = Missing(state, 1, 1, 0, 0, 0); if (miss != IdleReason.None) return miss; }
                     state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -1); state.AddStock(ResourceKind.FinishedGoods, 1); state.AddStock(ResourceKind.Scrap, 1);
-                    result.SteelConsumed++; result.EnergyConsumed++; result.FinishedGoods++; result.ScrapGenerated++; result.MachinesWorked++; return;
+                    result.SteelConsumed++; result.EnergyConsumed++; result.FinishedGoods++; result.ScrapGenerated++; result.MachinesWorked++; return IdleReason.None;
                 case MachineKind.ImprovedPress:
-                    if (!state.HasTechnology(TechnologyKind.ImprovedPress)) return;
+                    if (!state.HasTechnology(TechnologyKind.ImprovedPress)) return IdleReason.MissingTechnology;
                     int improvedEnergy = state.HasTechnology(TechnologyKind.EnergyEfficiency) ? 1 : 2;
-                    if (state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < improvedEnergy) return;
+                    { var miss = Missing(state, 1, improvedEnergy, 0, 0, 0); if (miss != IdleReason.None) return miss; }
                     state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -improvedEnergy); state.AddStock(ResourceKind.FinishedGoods, 2); state.AddStock(ResourceKind.Scrap, 1);
-                    result.SteelConsumed++; result.EnergyConsumed += improvedEnergy; result.FinishedGoods += 2; result.ScrapGenerated++; result.MachinesWorked++; return;
+                    result.SteelConsumed++; result.EnergyConsumed += improvedEnergy; result.FinishedGoods += 2; result.ScrapGenerated++; result.MachinesWorked++; return IdleReason.None;
                 case MachineKind.HighSpeedPress:
-                    if (!state.HasTechnology(TechnologyKind.AdvancedPress) || state.GetStock(ResourceKind.Steel) < 2 || state.GetStock(ResourceKind.Energy) < 3) return;
+                    if (!state.HasTechnology(TechnologyKind.AdvancedPress)) return IdleReason.MissingTechnology;
+                    { var miss = Missing(state, 2, 3, 0, 0, 0); if (miss != IdleReason.None) return miss; }
                     state.AddStock(ResourceKind.Steel, -2); state.AddStock(ResourceKind.Energy, -3); int output = 3 + Math.Max(0, logisticsBonus) / 10;
-                    state.AddStock(ResourceKind.FinishedGoods, output); state.AddStock(ResourceKind.Scrap, 2); result.SteelConsumed += 2; result.EnergyConsumed += 3; result.FinishedGoods += output; result.ScrapGenerated += 2; result.MachinesWorked++; return;
+                    state.AddStock(ResourceKind.FinishedGoods, output); state.AddStock(ResourceKind.Scrap, 2); result.SteelConsumed += 2; result.EnergyConsumed += 3; result.FinishedGoods += output; result.ScrapGenerated += 2; result.MachinesWorked++; return IdleReason.None;
                 case MachineKind.Recycler:
-                    if (!state.HasTechnology(TechnologyKind.BasicAutomation) || state.GetStock(ResourceKind.Scrap) < 2 || state.GetStock(ResourceKind.Energy) < 1) return;
+                    if (!state.HasTechnology(TechnologyKind.BasicAutomation)) return IdleReason.MissingTechnology;
+                    { var miss = Missing(state, 0, 1, 0, 2, 0); if (miss != IdleReason.None) return miss; }
                     int recovered = 1 + (state.HasTechnology(TechnologyKind.AdvancedMaterials) ? 1 : 0);
-                    state.AddStock(ResourceKind.Scrap, -2); state.AddStock(ResourceKind.Energy, -1); state.AddStock(ResourceKind.Steel, recovered); result.ScrapRecycled += 2; result.EnergyConsumed++; result.MachinesWorked++; return;
+                    state.AddStock(ResourceKind.Scrap, -2); state.AddStock(ResourceKind.Energy, -1); state.AddStock(ResourceKind.Steel, recovered); result.ScrapRecycled += 2; result.EnergyConsumed++; result.MachinesWorked++; return IdleReason.None;
                 case MachineKind.Generator:
-                    if (state.GetStock(ResourceKind.Bitumen) < 2) return;
+                    { var miss = Missing(state, 0, 0, 2, 0, 0); if (miss != IdleReason.None) return miss; }
                     int generated = 3 + richness / 40;
-                    state.AddStock(ResourceKind.Bitumen, -2); state.AddStock(ResourceKind.Energy, generated); result.BitumenConsumed += 2; result.EnergyGenerated += generated; result.MachinesWorked++; return;
+                    state.AddStock(ResourceKind.Bitumen, -2); state.AddStock(ResourceKind.Energy, generated); result.BitumenConsumed += 2; result.EnergyGenerated += generated; result.MachinesWorked++; return IdleReason.None;
                 case MachineKind.ElectronicsAssembler:
-                    if (!state.HasTechnology(TechnologyKind.AdvancedMaterials) || state.GetStock(ResourceKind.Electronics) < 1 || state.GetStock(ResourceKind.Steel) < 1 || state.GetStock(ResourceKind.Energy) < 2) return;
-                    state.AddStock(ResourceKind.Electronics, -1); state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -2); state.AddStock(ResourceKind.FinishedGoods, 3); result.SteelConsumed++; result.EnergyConsumed += 2; result.FinishedGoods += 3; result.MachinesWorked++; return;
+                    if (!state.HasTechnology(TechnologyKind.AdvancedMaterials)) return IdleReason.MissingTechnology;
+                    { var miss = Missing(state, 1, 2, 0, 0, 1); if (miss != IdleReason.None) return miss; }
+                    state.AddStock(ResourceKind.Electronics, -1); state.AddStock(ResourceKind.Steel, -1); state.AddStock(ResourceKind.Energy, -2); state.AddStock(ResourceKind.FinishedGoods, 3); result.SteelConsumed++; result.EnergyConsumed += 2; result.FinishedGoods += 3; result.MachinesWorked++; return IdleReason.None;
             }
+            return IdleReason.Disabled;
+        }
+
+        static IdleReason Missing(StrategicState state, int steel, int energy, int bitumen, int scrap, int electronics)
+        {
+            if (state.GetStock(ResourceKind.Steel) < steel) return IdleReason.NoSteel;
+            if (state.GetStock(ResourceKind.Energy) < energy) return IdleReason.NoEnergy;
+            if (state.GetStock(ResourceKind.Bitumen) < bitumen) return IdleReason.NoBitumen;
+            if (state.GetStock(ResourceKind.Scrap) < scrap) return IdleReason.NoScrap;
+            if (state.GetStock(ResourceKind.Electronics) < electronics) return IdleReason.NoElectronics;
+            return IdleReason.None;
         }
 
         static bool IsMachineUnlocked(StrategicState state, MachineKind kind)
