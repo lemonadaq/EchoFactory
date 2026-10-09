@@ -44,3 +44,9 @@ Niesprawdzone: faktyczny zapis/odczyt JsonUtility w Unity (test Core nie używa 
 Zmieniono: `Core/GoalSystem.cs` (cel 50 000 C, bankructwo po 2 turach ujemnego salda), `Outcome`/`DebtTurns` w `StrategicState` i `StrategicSave` (bez zmiany wersji — stare zapisy czytają się jako „gra trwa”), blokada `EndTurn`/`ContinueToPlanning` po końcu gry, ekran końca gry (`Game.uxml`, `GameUI.cs`), cel i ostrzeżenie o długu w podsumowaniu, testy w `StrategyChecks`.
 Sprawdzono: CoreRunner (2139 + 140 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: wygląd i przepływ ekranu końca gry w Unity; zapis końcowego stanu pozwala „Kontynuuj” trafić prosto na ekran końca; osiągalność celu 50 000 C i balans (A09); kontrakty nie zostały zrobione.
+
+## 2026-10-09 — A06
+
+Zmieniono: `FactoryLayoutSystem` (`CanMoveMachine`/`MoveMachine`/`DemolishMachine`/`GetRefund`, wspólna stała odstępu), przyciski PRZESUŃ i ROZBIERZ (`Game.uxml`, `GameUI.cs`), testy w `StrategyChecks`.
+Sprawdzono: CoreRunner (2139 + 150 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: działanie i wygląd w Unity; przesuwanie jest „kliknij maszynę → PRZESUŃ → kliknij miejsce” (nie drag & drop); rozbiórka nie ma potwierdzenia.

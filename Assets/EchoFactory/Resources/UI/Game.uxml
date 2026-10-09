@@ -92,6 +92,8 @@
                         <ui:Label name="lbl-machine-name" text="—" class="h2 accent" style="margin-top: 6px;" />
                         <ui:Label name="lbl-machine-info" text="Kliknij maszynę na hali." class="small" />
                         <ui:Button name="btn-machine-toggle" text="WYŁĄCZ" class="btn" />
+                        <ui:Button name="btn-machine-move" text="PRZESUŃ" class="btn" />
+                        <ui:Button name="btn-machine-demolish" text="ROZBIERZ" class="btn" />
                         <ui:Label text="KUP MASZYNĘ" class="h2" style="margin-top: 16px;" />
                         <ui:Label name="lbl-shop-hint" text="Wybierz maszynę, potem kliknij wolne miejsce na hali." class="small" />
                         <ui:ScrollView name="machine-shop" class="grow" />

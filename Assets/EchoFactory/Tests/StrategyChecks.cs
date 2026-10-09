@@ -172,6 +172,21 @@ namespace EchoFactory.Tests
             threw=false; try{TurnSystem.EndTurn(lostBack);}catch(InvalidOperationException){threw=true;}
             Assert(threw,ref assertions);
 
+            var lay=StrategicWorldGenerator.NewGame(3); FactoryLayoutSystem.EnsureLayout(lay,1);
+            lay.Credits=10000; Assert(FactoryLayoutSystem.PlaceMachine(lay,1,MachineKind.BasicPress,0.9f,0.9f),ref assertions);
+            var fac=lay.Facilities[0]; int firstId=fac.Machines[0].Id; int newId=fac.Machines[1].Id;
+            Assert(!FactoryLayoutSystem.MoveMachine(lay,1,newId,fac.Machines[0].X,fac.Machines[0].Y),ref assertions);
+            Assert(!FactoryLayoutSystem.MoveMachine(lay,1,newId,1.5f,0.5f),ref assertions);
+            Assert(!FactoryLayoutSystem.MoveMachine(lay,1,9999,0.5f,0.9f),ref assertions);
+            Assert(FactoryLayoutSystem.MoveMachine(lay,1,newId,0.1f,0.9f) && fac.Machines[1].X==0.1f && fac.Machines[1].Y==0.9f,ref assertions);
+            Assert(FactoryLayoutSystem.MoveMachine(lay,1,newId,0.1f,0.9f),ref assertions);
+            int creditsBefore=lay.Credits; int machinePrice=ProductionSystem.GetMachinePrice(MachineKind.BasicPress);
+            Assert(FactoryLayoutSystem.DemolishMachine(lay,1,newId)==machinePrice/2 && lay.Credits==creditsBefore+machinePrice/2 && fac.Machines.Count==1,ref assertions);
+            Assert(FactoryLayoutSystem.DemolishMachine(lay,1,newId)==-1 && lay.Credits==creditsBefore+machinePrice/2,ref assertions);
+            Assert(FactoryLayoutSystem.DemolishMachine(lay,1,firstId)>=0 && fac.Machines.Count==0,ref assertions);
+            lay.Phase=StrategicPhase.Summary;
+            Assert(FactoryLayoutSystem.DemolishMachine(lay,1,firstId)==-1 && !FactoryLayoutSystem.CanMoveMachine(lay,1,firstId,0.5f,0.5f),ref assertions);
+
             return assertions;
         }
 

@@ -11,6 +11,8 @@ namespace EchoFactory.Core
 
     public static class FactoryLayoutSystem
     {
+        private const float MinDistanceSq = 0.035f;
+
         public static bool CanPlaceMachine(StrategicState state, int facilityId, MachineKind kind, float x, float y)
         {
             if (!ProductionSystem.CanBuildMachine(state, facilityId, kind)) return false;
@@ -24,7 +26,7 @@ namespace EchoFactory.Core
                 if (m.X < 0f || m.Y < 0f) continue;
                 float dx = m.X - x;
                 float dy = m.Y - y;
-                if (dx * dx + dy * dy < 0.035f) return false;
+                if (dx * dx + dy * dy < MinDistanceSq) return false;
             }
             return true;
         }
@@ -38,6 +40,63 @@ namespace EchoFactory.Core
             machine.X = x;
             machine.Y = y;
             return true;
+        }
+
+        public const int DemolishRefundPercent = 50;
+
+        public static bool CanMoveMachine(StrategicState state, int facilityId, int machineId, float x, float y)
+        {
+            if (state == null || state.Phase != StrategicPhase.Planning || state.Outcome != GameOutcome.Playing) return false;
+            if (x < 0f || x > 1f || y < 0f || y > 1f) return false;
+            FacilityState facility = FindFacility(state, facilityId);
+            if (facility == null || !facility.Unlocked) return false;
+            bool found = false;
+            for (int i = 0; i < facility.Machines.Count; i++)
+            {
+                MachineState m = facility.Machines[i];
+                if (m.Id == machineId) { found = true; continue; }
+                if (m.X < 0f || m.Y < 0f) continue;
+                float dx = m.X - x;
+                float dy = m.Y - y;
+                if (dx * dx + dy * dy < MinDistanceSq) return false;
+            }
+            return found;
+        }
+
+        public static bool MoveMachine(StrategicState state, int facilityId, int machineId, float x, float y)
+        {
+            if (!CanMoveMachine(state, facilityId, machineId, x, y)) return false;
+            FacilityState facility = FindFacility(state, facilityId);
+            for (int i = 0; i < facility.Machines.Count; i++)
+            {
+                if (facility.Machines[i].Id != machineId) continue;
+                facility.Machines[i].X = x;
+                facility.Machines[i].Y = y;
+                return true;
+            }
+            return false;
+        }
+
+        public static int GetRefund(MachineKind kind)
+        {
+            return ProductionSystem.GetMachinePrice(kind) * DemolishRefundPercent / 100;
+        }
+
+        // Removes the machine and returns half of its price; returns -1 when nothing was demolished.
+        public static int DemolishMachine(StrategicState state, int facilityId, int machineId)
+        {
+            if (state == null || state.Phase != StrategicPhase.Planning || state.Outcome != GameOutcome.Playing) return -1;
+            FacilityState facility = FindFacility(state, facilityId);
+            if (facility == null || !facility.Unlocked) return -1;
+            for (int i = 0; i < facility.Machines.Count; i++)
+            {
+                if (facility.Machines[i].Id != machineId) continue;
+                int refund = GetRefund(facility.Machines[i].Kind);
+                facility.Machines.RemoveAt(i);
+                state.Credits += refund;
+                return refund;
+            }
+            return -1;
         }
 
         public static void EnsureLayout(StrategicState state, int facilityId)

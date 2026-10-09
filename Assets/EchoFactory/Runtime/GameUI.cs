@@ -33,6 +33,7 @@ namespace EchoFactory.Runtime
         private int selectedFacility = -1;
         private int selectedMachine = -1;
         private MachineKind? placing;
+        private bool moving;
         private FactoryGame echoHall;
 
         private static readonly MachineKind[] AllMachines = { MachineKind.BasicPress, MachineKind.ImprovedPress, MachineKind.HighSpeedPress, MachineKind.Recycler, MachineKind.Generator, MachineKind.ElectronicsAssembler };
@@ -117,9 +118,11 @@ namespace EchoFactory.Runtime
             Click("btn-buy-parcel", BuyParcel);
             Click("btn-manage-parcel", () => Show(Screen.Facility));
             Click("btn-back-map", () => Show(Screen.Map));
-            Click("btn-back-facility", () => { placing = null; Show(Screen.Facility); });
-            Click("btn-cancel-place", () => { placing = null; Refresh(); });
+            Click("btn-back-facility", () => { placing = null; moving = false; Show(Screen.Facility); });
+            Click("btn-cancel-place", () => { placing = null; moving = false; Refresh(); });
             Click("btn-machine-toggle", ToggleMachine);
+            Click("btn-machine-move", StartMoving);
+            Click("btn-machine-demolish", DemolishSelected);
             Click("btn-build-lab", BuildResearchHall);
             Click("btn-next-turn", NextTurn);
 
@@ -210,7 +213,7 @@ namespace EchoFactory.Runtime
         {
             if (state == null && next != Screen.Menu) next = Screen.Menu;
             screen = next;
-            if (screen != Screen.Hall) placing = null;
+            if (screen != Screen.Hall) { placing = null; moving = false; }
             Refresh();
         }
 
@@ -243,6 +246,7 @@ namespace EchoFactory.Runtime
         private void StartPlacing(MachineKind kind)
         {
             placing = kind;
+            moving = false;
             Message("Kliknij wolne miejsce na hali, aby postawić: " + Names.Machine(kind) + ".");
             Refresh();
         }
@@ -250,11 +254,18 @@ namespace EchoFactory.Runtime
         private void OnFloorClicked(ClickEvent evt)
         {
             var floor = evt.currentTarget as VisualElement;
-            if (floor == null || evt.target != floor || placing == null || state == null) return;
+            if (floor == null || evt.target != floor || (placing == null && !moving) || state == null) return;
             Vector2 local = floor.WorldToLocal(evt.position);
             float w = floor.resolvedStyle.width, h = floor.resolvedStyle.height;
             if (w <= 0 || h <= 0) return;
             float x = Mathf.Clamp01(local.x / w), y = Mathf.Clamp01(local.y / h);
+            if (moving)
+            {
+                if (FactoryLayoutSystem.MoveMachine(state, selectedFacility, selectedMachine, x, y)) { moving = false; Message("Przesunięto maszynę."); }
+                else Message("Tu nie można przesunąć maszyny — za blisko innej.", true);
+                Refresh();
+                return;
+            }
             var kind = placing.Value;
             if (FactoryLayoutSystem.PlaceMachine(state, selectedFacility, kind, x, y))
             {
@@ -264,6 +275,27 @@ namespace EchoFactory.Runtime
                 Message("Postawiono: " + Names.Machine(kind) + ".");
             }
             else Message("Tu nie można postawić maszyny — za blisko innej albo brak środków.", true);
+            Refresh();
+        }
+
+        private void StartMoving()
+        {
+            if (FindMachine(selectedMachine) == null || state.Phase != StrategicPhase.Planning) return;
+            placing = null;
+            moving = true;
+            Message("Kliknij nowe miejsce na hali.");
+            Refresh();
+        }
+
+        private void DemolishSelected()
+        {
+            var m = FindMachine(selectedMachine);
+            if (m == null || state.Phase != StrategicPhase.Planning) return;
+            int refund = FactoryLayoutSystem.DemolishMachine(state, selectedFacility, selectedMachine);
+            if (refund < 0) return;
+            Message("Rozebrano: " + Names.Machine(m.Kind) + " (zwrot " + refund + " C).");
+            selectedMachine = -1;
+            moving = false;
             Refresh();
         }
 
@@ -459,7 +491,7 @@ namespace EchoFactory.Runtime
             if (f == null) { Show(Screen.Facility); return; }
             SetText("lbl-hall-title", "HALA #" + f.Id + "  ·  " + Names.Facility(f.Kind));
             SetText("lbl-hall-slots", "Sloty: " + f.Machines.Count + " / " + f.MachineSlots);
-            SetText("lbl-floor-caption", placing != null ? "USTAWIANIE: " + Names.Machine(placing.Value) + " · kliknij wolne miejsce" : "Kliknij maszynę, aby ją wybrać. Maszyny pracują podczas rozwiązania tury.");
+            SetText("lbl-floor-caption", moving ? "PRZESUWANIE · kliknij nowe miejsce" : placing != null ? "USTAWIANIE: " + Names.Machine(placing.Value) + " · kliknij wolne miejsce" : "Kliknij maszynę, aby ją wybrać. Maszyny pracują podczas rozwiązania tury.");
 
             var inputs = Find<VisualElement>("hall-inputs");
             if (inputs != null)
@@ -478,7 +510,7 @@ namespace EchoFactory.Runtime
             var floor = Find<VisualElement>("hall-floor");
             if (floor != null)
             {
-                floor.EnableInClassList("hall-floor--placing", placing != null);
+                floor.EnableInClassList("hall-floor--placing", placing != null || moving);
                 foreach (var old in floor.Query<VisualElement>(className: "machine-slot").ToList()) old.RemoveFromHierarchy();
                 foreach (var m in f.Machines)
                 {
@@ -498,7 +530,7 @@ namespace EchoFactory.Runtime
                     body.EnableInClassList("machine--disabled", !m.Enabled);
                     SetLabel(token, "label", Names.MachineShort(m.Kind));
                     int id = m.Id;
-                    body.RegisterCallback<ClickEvent>(e => { selectedMachine = id; placing = null; e.StopPropagation(); Refresh(); });
+                    body.RegisterCallback<ClickEvent>(e => { selectedMachine = id; placing = null; moving = false; e.StopPropagation(); Refresh(); });
                 }
             }
 
@@ -532,7 +564,12 @@ namespace EchoFactory.Runtime
                 if (shop.childCount == 0) shop.Add(new Label("Ten typ hali nie przyjmuje jeszcze maszyn.") { name = "shop-empty" });
             }
             SetText("lbl-shop-hint", f.Machines.Count >= f.MachineSlots ? "Brak wolnych slotów w tej hali." : "Wybierz maszynę, potem kliknij wolne miejsce na hali. Szare = brak technologii lub środków.");
-            SetVisible("btn-cancel-place", placing != null);
+            bool planning = state.Phase == StrategicPhase.Planning;
+            var move = Find<Button>("btn-machine-move");
+            if (move != null) { move.text = moving ? "KLIKNIJ NOWE MIEJSCE" : "PRZESUŃ"; move.SetEnabled(selected != null && planning); }
+            var demolish = Find<Button>("btn-machine-demolish");
+            if (demolish != null) { demolish.text = selected == null ? "ROZBIERZ" : "ROZBIERZ · zwrot " + FactoryLayoutSystem.GetRefund(selected.Kind) + " C"; demolish.SetEnabled(selected != null && planning); }
+            SetVisible("btn-cancel-place", placing != null || moving);
         }
 
         private void AddResource(VisualElement parent, ResourceKind kind)

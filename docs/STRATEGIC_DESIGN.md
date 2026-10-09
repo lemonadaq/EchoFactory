@@ -168,3 +168,7 @@ Immediate playable target:
 8. Return to Map
 
 The next implementation layer should expose the new machine/production model in Unity UI. After that, connect the existing Echo factory simulation to Production Hall execution and expand facilities, contracts, events and production chains without reverting to flat percentage progression.
+
+## Edycja hali
+
+W fazie planowania maszynę można przesunąć (obowiązuje ta sama reguła minimalnego odstępu co przy stawianiu) albo rozebrać ze zwrotem 50% ceny zakupu.
