@@ -56,3 +56,9 @@ Niesprawdzone: działanie i wygląd w Unity; przesuwanie jest „kliknij maszyn�
 Zmieniono: `ExtractionSystem.LogisticsYieldBonus` (Hala logistyczna zwiększa wydobycie działki), test w `StrategyChecks`, opis w `STRATEGIC_DESIGN.md`.
 Sprawdzono: CoreRunner (2139 + 154 asercje), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: UI nie komunikuje korzyści z hali (brak opisu w panelu budowy); opłacalność hali za 8000 C i balans (A09); hala logistyczna nadal nie przyjmuje maszyn.
+
+## 2026-10-09 — A08
+
+Zmieniono: `Core/TutorialSystem.cs` (5 wskazówek, aktywne tylko w planowaniu tury 1 przy trwającej grze), pasek `tutorial-bar` (`Game.uxml`, `Game.uss`), obsługa DALEJ/POMIŃ w `GameUI.cs`, testy w `StrategyChecks`.
+Sprawdzono: CoreRunner (2139 + 159 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: wygląd i położenie paska w Unity (może zasłaniać dół ekranu / nakładać się na komunikat); wskazówki są ręcznie przewijane (nie reagują na akcje gracza); postęp samouczka nie jest zapisywany.

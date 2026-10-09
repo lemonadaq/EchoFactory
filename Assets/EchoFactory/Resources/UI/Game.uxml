@@ -147,6 +147,12 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <ui:VisualElement name="tutorial-bar" class="tutorial-bar">
+            <ui:Label name="lbl-tutorial" text="" class="body grow" style="white-space: normal;" />
+            <ui:Button name="btn-tutorial-next" text="DALEJ" class="btn btn--primary" />
+            <ui:Button name="btn-tutorial-skip" text="POMIŃ" class="btn" />
+        </ui:VisualElement>
+
         <ui:Label name="lbl-message" text="" class="toast" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

@@ -29,6 +29,8 @@ namespace EchoFactory.Runtime
         private VisualElement root;
         private StrategicState state;
         private Screen screen = Screen.Menu;
+        private int tutorialStep;
+        private bool tutorialSkipped;
         private int selectedParcel;
         private int selectedFacility = -1;
         private int selectedMachine = -1;
@@ -125,6 +127,8 @@ namespace EchoFactory.Runtime
             Click("btn-machine-demolish", DemolishSelected);
             Click("btn-build-lab", BuildResearchHall);
             Click("btn-next-turn", NextTurn);
+            Click("btn-tutorial-next", () => { tutorialStep++; Refresh(); });
+            Click("btn-tutorial-skip", () => { tutorialSkipped = true; Refresh(); });
 
             var floor = root.Q("hall-floor");
             if (floor != null) floor.RegisterCallback<ClickEvent>(OnFloorClicked);
@@ -165,6 +169,8 @@ namespace EchoFactory.Runtime
         private void NewGame()
         {
             state = StrategicWorldGenerator.NewGame(Environment.TickCount);
+            tutorialStep = 0;
+            tutorialSkipped = false;
             selectedParcel = 0;
             selectedFacility = state.Facilities[0].Id;
             selectedMachine = -1;
@@ -177,6 +183,7 @@ namespace EchoFactory.Runtime
         {
             try { state = StrategicSaveStore.Load(); }
             catch (Exception e) { Message("Nie wczytano zapisu: " + e.Message, true); Refresh(); return; }
+            tutorialSkipped = true;
             selectedParcel = 0;
             selectedFacility = state.Facilities.Count > 0 ? state.Facilities[0].Id : -1;
             selectedMachine = -1;
@@ -357,6 +364,7 @@ namespace EchoFactory.Runtime
             SetVisible("screen-market", screen == Screen.Market);
             SetVisible("screen-summary", screen == Screen.Summary);
             SetVisible("screen-end", screen == Screen.End);
+            RefreshTutorial();
             if (state == null) return;
 
             RefreshTopBar();
@@ -367,6 +375,16 @@ namespace EchoFactory.Runtime
             else if (screen == Screen.Market) RefreshMarket();
             else if (screen == Screen.Summary) RefreshSummary();
             else if (screen == Screen.End) RefreshEnd();
+        }
+
+        private void RefreshTutorial()
+        {
+            string hint = tutorialSkipped || screen == Screen.Menu ? null : TutorialSystem.GetHint(state, tutorialStep);
+            SetVisible("tutorial-bar", hint != null);
+            if (hint == null) return;
+            SetText("lbl-tutorial", hint);
+            var next = Find<Button>("btn-tutorial-next");
+            if (next != null) { next.text = tutorialStep >= TutorialSystem.Steps.Length - 1 ? "ROZUMIEM" : "DALEJ"; }
         }
 
         private void RefreshTopBar()

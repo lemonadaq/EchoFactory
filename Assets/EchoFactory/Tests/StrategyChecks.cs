@@ -196,6 +196,16 @@ namespace EchoFactory.Tests
             lay.Phase=StrategicPhase.Summary;
             Assert(FactoryLayoutSystem.DemolishMachine(lay,1,firstId)==-1 && !FactoryLayoutSystem.CanMoveMachine(lay,1,firstId,0.5f,0.5f),ref assertions);
 
+            var tut=StrategicWorldGenerator.NewGame(5);
+            Assert(TutorialSystem.IsActive(tut) && TutorialSystem.GetHint(tut,0)==TutorialSystem.Steps[0],ref assertions);
+            Assert(TutorialSystem.GetHint(tut,-1)==null && TutorialSystem.GetHint(tut,TutorialSystem.Steps.Length)==null && TutorialSystem.GetHint(null,0)==null,ref assertions);
+            tut.Phase=StrategicPhase.Summary;
+            Assert(!TutorialSystem.IsActive(tut) && TutorialSystem.GetHint(tut,0)==null,ref assertions);
+            tut.Phase=StrategicPhase.Planning; tut.Turn=2;
+            Assert(!TutorialSystem.IsActive(tut),ref assertions);
+            tut.Turn=1; tut.Outcome=GameOutcome.Lost;
+            Assert(!TutorialSystem.IsActive(tut),ref assertions);
+
             return assertions;
         }
 

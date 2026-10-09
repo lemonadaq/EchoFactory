@@ -128,3 +128,10 @@
     font-size: 15px; color: var(--c-accent); -unity-font-style: bold; white-space: normal;
 }
 .toast--warning { color: var(--c-amber); }
+
+.tutorial-bar {
+    position: absolute; left: 30px; right: 30px; bottom: 44px;
+    flex-direction: row; align-items: center;
+    padding: 10px 14px; border-width: 1px; border-color: var(--c-accent);
+    background-color: rgba(10, 16, 24, 0.94);
+}
