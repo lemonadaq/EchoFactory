@@ -50,3 +50,9 @@ Niesprawdzone: wygląd i przepływ ekranu końca gry w Unity; zapis końcowego s
 Zmieniono: `FactoryLayoutSystem` (`CanMoveMachine`/`MoveMachine`/`DemolishMachine`/`GetRefund`, wspólna stała odstępu), przyciski PRZESUŃ i ROZBIERZ (`Game.uxml`, `GameUI.cs`), testy w `StrategyChecks`.
 Sprawdzono: CoreRunner (2139 + 150 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: działanie i wygląd w Unity; przesuwanie jest „kliknij maszynę → PRZESUŃ → kliknij miejsce” (nie drag & drop); rozbiórka nie ma potwierdzenia.
+
+## 2026-10-09 — A07
+
+Zmieniono: `ExtractionSystem.LogisticsYieldBonus` (Hala logistyczna zwiększa wydobycie działki), test w `StrategyChecks`, opis w `STRATEGIC_DESIGN.md`.
+Sprawdzono: CoreRunner (2139 + 154 asercje), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: UI nie komunikuje korzyści z hali (brak opisu w panelu budowy); opłacalność hali za 8000 C i balans (A09); hala logistyczna nadal nie przyjmuje maszyn.

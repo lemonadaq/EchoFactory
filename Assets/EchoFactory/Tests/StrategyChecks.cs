@@ -107,6 +107,15 @@ namespace EchoFactory.Tests
             ParcelSystem.Buy(bought,extra.Id); var mined=ExtractionSystem.Extract(bought);
             Assert(mined[extra.Resource]>=ExtractionSystem.YieldPerTurn(extra) && bought.GetStock(extra.Resource)>before1,ref assertions);
 
+            // A07: a Logistics Hall raises the parcel's yield; without it nothing changes.
+            var lg=StrategicWorldGenerator.NewGame(5); var lp=lg.Parcels[1]; lp.Owned=true; lp.LogisticsBonus=12; lp.ResourceRichness=60; lg.Credits=20000;
+            int lbase=ExtractionSystem.YieldPerTurn(lp);
+            Assert(ExtractionSystem.LogisticsYieldBonus(lg,lp)==0,ref assertions);
+            Assert(FacilitySystem.Build(lg,lp.Id,FacilityKind.LogisticsHall) && ExtractionSystem.LogisticsYieldBonus(lg,lp)==2,ref assertions);
+            int lstock=lg.GetStock(lp.Resource); var lmined=ExtractionSystem.Extract(lg);
+            Assert(lmined[lp.Resource]==lbase+2 && lg.GetStock(lp.Resource)==lstock+lbase+2,ref assertions);
+            Assert(ExtractionSystem.LogisticsYieldBonus(lg,lg.Parcels[0])==0,ref assertions);
+
             // A02: market prices follow supply; goods are no longer auto-sold.
             var m=StrategicWorldGenerator.NewGame(1);
             Assert(m.Credits==10000 && MarketSystem.BuyPrice(m,ResourceKind.Steel)>MarketSystem.SellPrice(m,ResourceKind.Steel),ref assertions);

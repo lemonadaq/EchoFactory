@@ -142,7 +142,7 @@ Handle more complex bottlenecks
 Each parcel has price, size, primary resource, resource richness, logistics bonus and ownership. Different map seeds produce different distributions. Parcels should eventually create specialization: cheap land, rich deposits, logistics hubs and large expansion sites should have different consequences.
 
 ## Extraction
-At the start of turn resolution every owned parcel mines its primary resource: `richness / 20` units (min. 1). An owned parcel with a facility also draws 1 Energy from the grid. The starter parcel is always Steel, so the starter press can run indefinitely; other resources require buying matching parcels.
+At the start of turn resolution every owned parcel mines its primary resource: `richness / 20` units (min. 1). An owned parcel with a facility also draws 1 Energy from the grid. The starter parcel is always Steel, so the starter press can run indefinitely; other resources require buying matching parcels. A Logistics Hall (8,000 C) on a parcel adds transport capacity: +1 unit of that parcel's resource per turn, plus 1 more per 10 points of the parcel's logistics bonus.
 
 ## Market
 Finished goods and scrap are sold by the player (not automatically); steel, energy, bitumen and electronics can be bought. Each resource has a supply level (-10..10) that sets its price (±5% per level around a base price); buying lowers supply (price up), selling raises it (price down), and every turn supply drifts one step back to 0. Buying costs 10% above and selling pays 10% below the mid price, and the price shifts after every unit in a batch. The Market screen is available during planning.
