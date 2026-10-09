@@ -136,7 +136,7 @@ namespace EchoFactory.Tests
             Assert(MarketSystem.SellPrice(m,ResourceKind.Scrap)>=1 && m.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply,ref assertions);
             var cp=m.Copy(); Assert(cp.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply,ref assertions);
             TurnSystem.EndTurn(m);
-            Assert(m.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply-1 && m.GetSupply(ResourceKind.Steel)==-2,ref assertions);
+            Assert(m.GetSupply(ResourceKind.Scrap)==MarketSystem.MaxSupply-MarketSystem.RecoveryPerTurn && m.GetSupply(ResourceKind.Steel)==Math.Min(0,-3+MarketSystem.RecoveryPerTurn),ref assertions);
             var loop=StrategicWorldGenerator.NewGame(12345);
             for(int t=0;t<20;t++){TurnSystem.EndTurn(loop); TurnSystem.ContinueToPlanning(loop); MarketSystem.Sell(loop,ResourceKind.FinishedGoods,loop.GetStock(ResourceKind.FinishedGoods)); Assert(loop.GetStock(ResourceKind.Steel)>0,ref assertions);}
             Assert(loop.Credits>10000,ref assertions);
@@ -205,6 +205,24 @@ namespace EchoFactory.Tests
             Assert(!TutorialSystem.IsActive(tut),ref assertions);
             tut.Turn=1; tut.Outcome=GameOutcome.Lost;
             Assert(!TutorialSystem.IsActive(tut),ref assertions);
+
+            // A09: balance. Three scripted strategies plus a reckless one, 30 and 60 turns, several seeds.
+            for(int seed=1;seed<=6;seed++)
+            {
+                var idle=BalanceSimulation.Run(0,seed); var market=BalanceSimulation.Run(1,seed); var grow=BalanceSimulation.Run(2,seed); var reckless=BalanceSimulation.Run(3,seed);
+                if(Environment.GetEnvironmentVariable("ECHO_BALANCE_REPORT")!=null)foreach(var r in new[]{idle,market,grow,reckless})Console.WriteLine("seed "+seed+" "+r.Name+": koniec "+r.FinalCredits+" C, minimum "+r.MinCredits+" C, "+r.Outcome);
+                Assert(idle.Outcome==GameOutcome.Playing && idle.MinCredits>=10000,ref assertions); // the starter never goes bankrupt without player errors
+                Assert(market.Outcome==GameOutcome.Playing && market.FinalCredits>idle.FinalCredits,ref assertions); // buying inputs and selling goods beats waiting
+                Assert(grow.Outcome==GameOutcome.Playing && grow.MinCredits>0 && grow.FinalCredits>0,ref assertions);
+                Assert(reckless.FinalCredits<idle.FinalCredits/2,ref assertions); // overbuilding halls with no production is clearly worse
+                var growLong=BalanceSimulation.Run(2,seed,60);
+                Assert(growLong.Outcome==GameOutcome.Playing && growLong.FinalCredits>10000,ref assertions);
+            }
+            var broke=StrategicWorldGenerator.NewGame(1); broke.Credits=1000;
+            for(int h=0;h<4;h++)broke.Facilities.Add(new FacilityState{Id=broke.NextFacilityId++,Kind=FacilityKind.Workshop,ParcelId=0,MachineSlots=2});
+            int brokeTurns=0;
+            while(broke.Outcome==GameOutcome.Playing && brokeTurns<20){TurnSystem.EndTurn(broke); brokeTurns++; if(broke.Outcome==GameOutcome.Playing)TurnSystem.ContinueToPlanning(broke);}
+            Assert(broke.Outcome==GameOutcome.Lost && brokeTurns<=12,ref assertions); // idle halls with no production bankrupt the player
 
             return assertions;
         }

@@ -62,3 +62,9 @@ Niesprawdzone: UI nie komunikuje korzyści z hali (brak opisu w panelu budowy); 
 Zmieniono: `Core/TutorialSystem.cs` (5 wskazówek, aktywne tylko w planowaniu tury 1 przy trwającej grze), pasek `tutorial-bar` (`Game.uxml`, `Game.uss`), obsługa DALEJ/POMIŃ w `GameUI.cs`, testy w `StrategyChecks`.
 Sprawdzono: CoreRunner (2139 + 159 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: wygląd i położenie paska w Unity (może zasłaniać dół ekranu / nakładać się na komunikat); wskazówki są ręcznie przewijane (nie reagują na akcje gracza); postęp samouczka nie jest zapisywany.
+
+## 2026-10-09 — A09
+
+Zmieniono: `Tests/BalanceSimulation.cs` (4 skryptowane strategie na prawdziwej pętli tur), asercje balansu i scenariusz bankructwa w `StrategyChecks`; liczby: cena produktów 120 → 260 C, `MarketSystem.RecoveryPerTurn` = 3 (było 1; oczekiwane wartości podaży w teście A02 dostosowane do stałej), koszt utrzymania 100 + 100 C na halę (`TurnSystem.OperatingCostPerFacility`; start bez zmian), `STRATEGIC_DESIGN.md`, wyniki w `VALIDATION.md`.
+Sprawdzono: CoreRunner (2139 + 190 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: odczucie balansu w Unity; strategie nie używają badań ani ulepszonych pras; cel 50 000 C nieosiągalny w 60 turach, ekspansja słabsza od pras z rynku (nowe zadanie A12); ceny w UI nie były oglądane.

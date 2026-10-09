@@ -46,3 +46,20 @@ Filtr dziennika, ramka pola problemu, przejście do stacji i widok kolejki mają
 - Zewnętrzne sesje testerów ani bramki akceptacyjne dokumentu projektu.
 
 Przejście testów Core nie jest potwierdzeniem działania projektu w Unity. Scena jest przygotowana do importu; pierwsze uruchomienie w edytorze pozostaje wymaganym krokiem.
+
+## A09 — balans (9 października 2026)
+
+Testy w `Tests/BalanceSimulation.cs` (uruchamiane z `StrategyChecks`) grają cztery skryptowane strategie przez 30 tur na 6 światach (seedy 1–6); drugi przebieg po 60 tur sprawdza strategię ekspansji. Zmiany liczb: cena bazowa produktów 120 → 260 C, powrót podaży rynku 1 → 3 poziomy na turę, koszt utrzymania 150 + 50/hala → 100 + 100/hala (start bez zmian: 200 C).
+
+Wyniki po 30 turach (saldo końcowe, start 10 000 C; `ECHO_BALANCE_REPORT=1 dotnet run --project Tests/CoreRunner` wypisuje całą tabelę):
+
+| Strategia | Wynik 30 tur | Uwagi |
+| --- | --- | --- |
+| Bierny (tylko koniec tury, sprzedaż produktów) | 20 047 C | start nie bankrutuje bez błędów gracza |
+| Prasy z rynku (2 prasy, zakup stali i energii) | 24 789 C | najlepsza z badanych, minimum 8 900 C |
+| Ekspansja (nowa działka + hala + 6 pras) | 5 226 – 24 789 C | zależy od losowych działek; po 60 turach wszystkie powyżej 10 000 C |
+| Lekkomyślny (hale bez produkcji) | 2 300 C | wyraźnie gorszy od biernego |
+
+Bankructwo: scenariusz z 4 dodatkowymi halami bez produkcji i saldem 1 000 C kończy się porażką w ≤ 12 turach (test).
+
+Wnioski i ograniczenia: ekspansja nie wygrywa z prasami z rynku w 30 turach ani po 60 (zwraca się wolno; hala 6 000 C bez własnego dochodu), a cel 50 000 C nie jest osiągany przez żadną strategię w 60 turach (najlepsza ok. 41 000 C). Gracze ręczni mogą być lepsi (badania, ulepszone prasy, elektronika nie były w skryptach). Strategie są proste, nie dowód optymalności. Liczby nie były grane w Unity.

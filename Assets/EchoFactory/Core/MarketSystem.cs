@@ -8,6 +8,7 @@ namespace EchoFactory.Core
     {
         public const int MaxSupply = 10;
         public const int PercentPerSupply = 5;
+        public const int RecoveryPerTurn = 3;
         public const int BuySpreadPercent = 110;
         public const int SellSpreadPercent = 90;
 
@@ -20,7 +21,7 @@ namespace EchoFactory.Core
                 case ResourceKind.Bitumen: return 35;
                 case ResourceKind.Scrap: return 10;
                 case ResourceKind.Electronics: return 90;
-                case ResourceKind.FinishedGoods: return 120;
+                case ResourceKind.FinishedGoods: return 260;
                 default: return 0;
             }
         }
@@ -86,7 +87,7 @@ namespace EchoFactory.Core
             return true;
         }
 
-        // Called once per turn: every price level moves one step back toward its base.
+        // Called once per turn: every price level moves RecoveryPerTurn steps back toward its base.
         public static void Recover(StrategicState state)
         {
             if (state == null) return;
@@ -94,7 +95,7 @@ namespace EchoFactory.Core
             for (int i = 0; i < keys.Count; i++)
             {
                 int s = state.MarketSupply[keys[i]];
-                state.SetSupply(keys[i], s > 0 ? s - 1 : s < 0 ? s + 1 : 0);
+                state.SetSupply(keys[i], s > 0 ? Math.Max(0, s - RecoveryPerTurn) : s < 0 ? Math.Min(0, s + RecoveryPerTurn) : 0);
             }
         }
     }
