@@ -8,7 +8,7 @@ namespace EchoFactory.Core
         {
             switch (kind)
             {
-                case FacilityKind.ProductionHall: return 6000;
+                case FacilityKind.ProductionHall: return 4000;
                 case FacilityKind.LogisticsHall: return 8000;
                 case FacilityKind.EnergyHall: return 7000;
                 case FacilityKind.Workshop: return 6500;

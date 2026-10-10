@@ -31,7 +31,7 @@ namespace EchoFactory.Tests
             Assert(a.Turn==2 && a.Phase==StrategicPhase.Planning,ref assertions);
 
             var strategy=StrategicWorldGenerator.NewGame(77);
-            strategy.Credits=19300;
+            strategy.Credits=14800;
             Assert(ResearchSystem.BuildResearchHall(strategy,0),ref assertions);
             Assert(strategy.Facilities.Count==2,ref assertions);
             Assert(ResearchSystem.UnlockTechnology(strategy,TechnologyKind.BasicAutomation),ref assertions);
@@ -218,14 +218,17 @@ namespace EchoFactory.Tests
             // A09: balance. Three scripted strategies plus a reckless one, 30 and 60 turns, several seeds.
             for(int seed=1;seed<=6;seed++)
             {
-                var idle=BalanceSimulation.Run(0,seed); var market=BalanceSimulation.Run(1,seed); var grow=BalanceSimulation.Run(2,seed); var reckless=BalanceSimulation.Run(3,seed);
-                if(Environment.GetEnvironmentVariable("ECHO_BALANCE_REPORT")!=null)foreach(var r in new[]{idle,market,grow,reckless})Console.WriteLine("seed "+seed+" "+r.Name+": koniec "+r.FinalCredits+" C, minimum "+r.MinCredits+" C, "+r.Outcome);
+                var idle=BalanceSimulation.Run(0,seed); var market=BalanceSimulation.Run(1,seed); var grow=BalanceSimulation.Run(2,seed); var reckless=BalanceSimulation.Run(3,seed); var research=BalanceSimulation.Run(4,seed);
+                if(Environment.GetEnvironmentVariable("ECHO_BALANCE_REPORT")!=null)foreach(var r in new[]{idle,market,grow,reckless,research})Console.WriteLine("seed "+seed+" "+r.Name+": koniec "+r.FinalCredits+" C, minimum "+r.MinCredits+" C, "+r.Outcome);
                 Assert(idle.Outcome==GameOutcome.Playing && idle.MinCredits>=10000,ref assertions); // the starter never goes bankrupt without player errors
                 Assert(market.Outcome==GameOutcome.Playing && market.FinalCredits>idle.FinalCredits,ref assertions); // buying inputs and selling goods beats waiting
                 Assert(grow.Outcome==GameOutcome.Playing && grow.MinCredits>0 && grow.FinalCredits>0,ref assertions);
                 Assert(reckless.FinalCredits<idle.FinalCredits/2,ref assertions); // overbuilding halls with no production is clearly worse
-                var growLong=BalanceSimulation.Run(2,seed,60);
-                Assert(growLong.Outcome==GameOutcome.Playing && growLong.FinalCredits>10000,ref assertions);
+                var marketLong=BalanceSimulation.Run(1,seed,100); var growLong=BalanceSimulation.Run(2,seed,100); var researchLong=BalanceSimulation.Run(4,seed,100);
+                if(Environment.GetEnvironmentVariable("ECHO_BALANCE_REPORT")!=null)foreach(var lr in new[]{marketLong,growLong,researchLong})Console.WriteLine("100t seed "+seed+" "+lr.Name+": koniec "+lr.FinalCredits+" C, tur "+lr.Turns+", "+lr.Outcome);
+                Assert(marketLong.Outcome==GameOutcome.Won && marketLong.Turns>=40 && marketLong.Turns<=60,ref assertions); // A12: the best scripted strategy wins in 40-60 turns
+                Assert(growLong.Outcome==GameOutcome.Won && growLong.Turns<=100,ref assertions); // expansion and research are slower but still reach the goal
+                Assert(researchLong.Outcome==GameOutcome.Won && researchLong.Turns>marketLong.Turns && researchLong.Turns<=100,ref assertions);
             }
             var broke=StrategicWorldGenerator.NewGame(1); broke.Credits=1000;
             for(int h=0;h<4;h++)broke.Facilities.Add(new FacilityState{Id=broke.NextFacilityId++,Kind=FacilityKind.Workshop,ParcelId=0,MachineSlots=2});

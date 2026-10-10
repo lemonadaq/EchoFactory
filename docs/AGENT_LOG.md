@@ -74,3 +74,9 @@ Niesprawdzone: odczucie balansu w Unity; strategie nie używają badań ani ulep
 Zmieniono: `Core/GameSettings.cs` (głośność 0–100% w krokach 10, pełny ekran), `Runtime/SettingsStore.cs` (PlayerPrefs + zastosowanie `AudioListener.volume`/`Screen.fullScreen`), nakładka pauzy `pause-overlay` (`Game.uxml`, `Game.uss`), obsługa Esc i przycisków w `GameUI.cs`, testy w `StrategyChecks`.
 Sprawdzono: CoreRunner (2139 + 196 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: działanie Esc, nakładki i przełączania pełnego ekranu w Unity (projekt używa starego Input Managera — `Input.GetKeyDown`); „Wyjdź z gry” nie zatrzymuje Play w edytorze; Esc nie działa w prototypie Hali Echo (ma własne „← MENU GŁÓWNE”); pauza nie wstrzymuje niczego poza interfejsem (gra jest turowa).
+
+## 2026-10-10 — A12
+
+Zmieniono: cel `GoalSystem.WinCredits` 50 000 → 35 000 C, cena Hali Produkcyjnej 6 000 → 4 000 C, Hali Badawczej 7 500 → 4 000 C (komunikat w `GameUI.cs` czyta stałą), koszty badań 1 500 + 500·i, nowa strategia „Badania” w `BalanceSimulation`, asercje wygranej w 40–60 turach (prasy), do 100 tur (ekspansja, badania); wartości w testach zależne od cen dostosowane (saldo 19 300 → 14 800 w teście Hali Badawczej), `STRATEGIC_DESIGN.md`, `VALIDATION.md`.
+Sprawdzono: CoreRunner (2139 + 208 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: odczucie balansu w Unity; opis kosztów w UI (karty badań czytają koszt ze stanu); badania nadal wolniejsze od pras z rynku (nowe zadanie A13); A10 pominięte, bo zależy od U01 (Filip).

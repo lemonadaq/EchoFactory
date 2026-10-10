@@ -358,7 +358,7 @@ namespace EchoFactory.Runtime
             var parcel = ParcelSystem.Find(state, selectedParcel);
             int parcelId = parcel != null && parcel.Owned ? parcel.Id : 0;
             if (ResearchSystem.BuildResearchHall(state, parcelId)) Message("Zbudowano Halę Badawczą na działce " + (parcelId + 1) + ".");
-            else Message("Nie można zbudować Hali Badawczej (7500 C, jedna na sieć).", true);
+            else Message("Nie można zbudować Hali Badawczej (" + ResearchSystem.ResearchHallPrice + " C, jedna na sieć).", true);
             Refresh();
         }
 

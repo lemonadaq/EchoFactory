@@ -63,3 +63,17 @@ Wyniki po 30 turach (saldo końcowe, start 10 000 C; `ECHO_BALANCE_REPORT=1 dotn
 Bankructwo: scenariusz z 4 dodatkowymi halami bez produkcji i saldem 1 000 C kończy się porażką w ≤ 12 turach (test).
 
 Wnioski i ograniczenia: ekspansja nie wygrywa z prasami z rynku w 30 turach ani po 60 (zwraca się wolno; hala 6 000 C bez własnego dochodu), a cel 50 000 C nie jest osiągany przez żadną strategię w 60 turach (najlepsza ok. 41 000 C). Gracze ręczni mogą być lepsi (badania, ulepszone prasy, elektronika nie były w skryptach). Strategie są proste, nie dowód optymalności. Liczby nie były grane w Unity.
+
+## A12 — balans celu i ekspansji (10 października 2026)
+
+Zmiany liczb: cel 50 000 → 35 000 C, Hala Produkcyjna 6 000 → 4 000 C, Hala Badawcza 7 500 → 4 000 C, koszty badań 2 500 + 1 000·i → 1 500 + 500·i (1 500 … 4 000 C). Do symulacji dodano strategię „Badania” (Hala Badawcza, Automatyzacja, Ulepszona prasa, Efektywność energii, ulepszone prasy). Uruchomienie: `ECHO_BALANCE_REPORT=1 dotnet run --project Tests/CoreRunner`.
+
+Wygrana (saldo ≥ 35 000 C), seedy 1–6, do 100 tur:
+
+| Strategia | Tura wygranej |
+| --- | --- |
+| Prasy z rynku | 49 (każdy seed) |
+| Ekspansja | 49 – 77 (zależnie od działek) |
+| Badania | 85 |
+
+Wnioski i ograniczenia: najlepsza strategia wygrywa w 40–60 turach (test), pozostałe wygrywają później. Ekspansja i badania nadal są wolniejsze od pras z rynku — na starcie hala ma tylko 2 miejsca, więc badania dają jedną ulepszoną prasę; tylko wystarczająco tanie, by nie były pułapką. Nie ma strategii dominującej w sensie dowodu, a skrypty są proste. Liczby nie były grane w Unity.

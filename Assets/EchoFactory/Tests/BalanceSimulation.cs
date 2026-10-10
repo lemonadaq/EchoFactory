@@ -16,7 +16,7 @@ namespace EchoFactory.Tests
     {
         public const int Turns = 30;
 
-        public static readonly string[] Names = { "Bierny", "Prasy z rynku", "Ekspansja", "Lekkomyslny" };
+        public static readonly string[] Names = { "Bierny", "Prasy z rynku", "Ekspansja", "Lekkomyslny", "Badania" };
 
         public static BalanceResult Run(int strategy, int seed, int turns = Turns)
         {
@@ -43,6 +43,7 @@ namespace EchoFactory.Tests
                 case 1: BuildPress(s, 2); Feed(s, 20); break;
                 case 2: Expand(s); Feed(s, 20); break;
                 case 3: Reckless(s); break;
+                case 4: Research(s); break;
             }
         }
 
@@ -71,6 +72,53 @@ namespace EchoFactory.Tests
             int steelNeed = presses - s.GetStock(ResourceKind.Steel), energyNeed = presses - s.GetStock(ResourceKind.Energy);
             if (steelNeed > 0) MarketSystem.Buy(s, ResourceKind.Steel, Math.Min(steelNeed, maxUnits));
             if (energyNeed > 0) MarketSystem.Buy(s, ResourceKind.Energy, Math.Min(energyNeed, maxUnits));
+        }
+
+        // A12: research hall + technologies, then improved presses in every free slot of production halls.
+        static void Research(StrategicState s)
+        {
+            if (!ResearchSystem.HasResearchHall(s))
+            {
+                int parcel = -1;
+                for (int i = 0; i < s.Parcels.Count; i++) if (s.Parcels[i].Owned) { parcel = s.Parcels[i].Id; break; }
+                if (parcel >= 0 && Affordable(s, ResearchSystem.ResearchHallPrice, 1500)) ResearchSystem.BuildResearchHall(s, parcel);
+            }
+            else
+            {
+                TechnologyKind[] order = { TechnologyKind.BasicAutomation, TechnologyKind.ImprovedPress, TechnologyKind.EnergyEfficiency };
+                for (int i = 0; i < order.Length; i++)
+                    if (!s.HasTechnology(order[i])) { if (s.Credits - ResearchCostOf(s, order[i]) >= 1500) ResearchSystem.UnlockTechnology(s, order[i]); break; }
+            }
+            for (int i = 0; i < s.Facilities.Count; i++)
+            {
+                var f = s.Facilities[i];
+                if (f.Kind != FacilityKind.ProductionHall) continue;
+                var kind = s.HasTechnology(TechnologyKind.ImprovedPress) ? MachineKind.ImprovedPress : MachineKind.BasicPress;
+                while (f.Machines.Count < f.MachineSlots && Affordable(s, ProductionSystem.MachineCost(kind), 1500) && ProductionSystem.BuildMachine(s, f.Id, kind)) { }
+            }
+            FeedAll(s, 30);
+        }
+
+        static int ResearchCostOf(StrategicState s, TechnologyKind k)
+        {
+            for (int i = 0; i < s.Technologies.Count; i++) if (s.Technologies[i].Kind == k) return s.Technologies[i].ResearchCost;
+            return int.MaxValue;
+        }
+
+        // Buys exactly the steel and energy every press (basic or improved) needs next turn.
+        static void FeedAll(StrategicState s, int maxUnits)
+        {
+            int steel = 0, energy = 0;
+            int improvedEnergy = s.HasTechnology(TechnologyKind.EnergyEfficiency) ? 1 : 2;
+            for (int i = 0; i < s.Facilities.Count; i++)
+                for (int j = 0; j < s.Facilities[i].Machines.Count; j++)
+                {
+                    var k = s.Facilities[i].Machines[j].Kind;
+                    if (k == MachineKind.BasicPress) { steel++; energy++; }
+                    else if (k == MachineKind.ImprovedPress) { steel++; energy += improvedEnergy; }
+                }
+            if (steel > s.GetStock(ResourceKind.Steel)) MarketSystem.Buy(s, ResourceKind.Steel, Math.Min(steel - s.GetStock(ResourceKind.Steel), maxUnits));
+            if (energy > s.GetStock(ResourceKind.Energy)) MarketSystem.Buy(s, ResourceKind.Energy, Math.Min(energy - s.GetStock(ResourceKind.Energy), maxUnits));
         }
 
         static void Expand(StrategicState s)

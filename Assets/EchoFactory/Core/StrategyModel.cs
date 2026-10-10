@@ -58,7 +58,7 @@ namespace EchoFactory.Core
             var s=new StrategicState{Parcels=GenerateParcels(seed,9)}; s.Parcels[0].Owned=true; s.Parcels[0].Resource=ResourceKind.Steel;
             var starter=new FacilityState{Id=s.NextFacilityId++,Kind=FacilityKind.ProductionHall,ParcelId=0,MachineSlots=2,PassiveIncomePerTurn=300};
             starter.Machines.Add(new MachineState{Id=s.NextMachineId++,FacilityId=starter.Id,Kind=MachineKind.BasicPress}); s.Facilities.Add(starter);
-            for(int i=0;i<StartingTechnologies.Length;i++)s.Technologies.Add(new TechnologyState{Kind=StartingTechnologies[i],ResearchCost=2500+i*1000});
+            for(int i=0;i<StartingTechnologies.Length;i++)s.Technologies.Add(new TechnologyState{Kind=StartingTechnologies[i],ResearchCost=1500+i*500});
             s.AddStock(ResourceKind.Steel,25); s.AddStock(ResourceKind.Energy,5); return s;
         }
         public static List<ParcelState> GenerateParcels(int seed,int count){var rng=new Random(seed);var result=new List<ParcelState>();for(int i=0;i<count;i++)result.Add(new ParcelState{Id=i,Price=5000+rng.Next(0,8)*1500,Size=700+rng.Next(0,14)*100,Resource=Resources[rng.Next(Resources.Length)],ResourceRichness=35+rng.Next(66),LogisticsBonus=rng.Next(-5,16)});return result;}

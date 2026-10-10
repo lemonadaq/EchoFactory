@@ -3,7 +3,7 @@ namespace EchoFactory.Core
     // Win/lose rules: reach WinCredits to win; Credits below zero for BankruptcyTurns turns in a row means bankruptcy.
     public static class GoalSystem
     {
-        public const int WinCredits=50000;
+        public const int WinCredits=35000;
         public const int BankruptcyTurns=2;
 
         public static void Evaluate(StrategicState state)

@@ -46,7 +46,7 @@ Current prototype machine roles:
 This is intentionally a **chain model**, not a percentage model. A player can build around energy generation, scrap recovery, logistics or raw-material access, and those choices can reinforce or undermine one another.
 
 ## R&D / technology progression
-The Research Hall is the gate to technology progression. It currently costs **7,500 Credits** and must be built on an owned parcel.
+The Research Hall is the gate to technology progression. It currently costs **4,000 Credits** and must be built on an owned parcel.
 
 Technologies should unlock mechanics, machines, production chains or strategic options. Flat bonuses are allowed only when they support a meaningful mechanical change.
 
@@ -64,12 +64,12 @@ Current prototype tree:
 ```
 
 Research costs:
-- Basic Automation — 2,500
-- Improved Press — 3,500
-- Advanced Press — 4,500
-- Smart Logistics — 5,500
-- Energy Efficiency — 6,500
-- Advanced Materials — 7,500
+- Basic Automation — 1,500
+- Improved Press — 2,000
+- Advanced Press — 2,500
+- Smart Logistics — 3,000
+- Energy Efficiency — 3,500
+- Advanced Materials — 4,000
 
 The exact tree is provisional. The important rule is that researching something should change what the player can **build or combine**, not merely make the same factory produce a larger number.
 
@@ -151,7 +151,7 @@ Finished goods and scrap are sold by the player (not automatically); steel, ener
 Production, passive income, operating costs (100 C base + 100 C per facility) and resource changes resolve when the player ends the turn. The turn summary should explain **what happened to the factory**, not just show a single profit number.
 
 ## Goal and game end
-The run is won when Credits reach 50 000 at the end of a turn. It is lost when Credits stay below zero at the end of two consecutive turns (bankruptcy). After either outcome the turn can no longer advance; the end screen returns to the main menu.
+The run is won when Credits reach 35 000 at the end of a turn. It is lost when Credits stay below zero at the end of two consecutive turns (bankruptcy). After either outcome the turn can no longer advance; the end screen returns to the main menu.
 
 ## Visual direction
 Use a lighter, readable industrial-management presentation rather than the dark prototype palette. Temporary geometry is acceptable until the systems are proven; final models can be introduced later without changing the Core state model.
