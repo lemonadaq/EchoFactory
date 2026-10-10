@@ -80,3 +80,9 @@ Niesprawdzone: działanie Esc, nakładki i przełączania pełnego ekranu w Unit
 Zmieniono: cel `GoalSystem.WinCredits` 50 000 → 35 000 C, cena Hali Produkcyjnej 6 000 → 4 000 C, Hali Badawczej 7 500 → 4 000 C (komunikat w `GameUI.cs` czyta stałą), koszty badań 1 500 + 500·i, nowa strategia „Badania” w `BalanceSimulation`, asercje wygranej w 40–60 turach (prasy), do 100 tur (ekspansja, badania); wartości w testach zależne od cen dostosowane (saldo 19 300 → 14 800 w teście Hali Badawczej), `STRATEGIC_DESIGN.md`, `VALIDATION.md`.
 Sprawdzono: CoreRunner (2139 + 208 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: odczucie balansu w Unity; opis kosztów w UI (karty badań czytają koszt ze stanu); badania nadal wolniejsze od pras z rynku (nowe zadanie A13); A10 pominięte, bo zależy od U01 (Filip).
+
+## 2026-10-10 — A13
+
+Zmieniono: `ProductionSystem.SlotCount` (Automatyzacja podstawowa: +1 miejsce w każdej Hali Produkcyjnej; budowa maszyn i UI w `GameUI.cs` używają go zamiast `MachineSlots`), cena Hali Badawczej 4 000 → 1 000 C, strategia „Badania” w `BalanceSimulation` (Automatyzacja + zwykłe prasy), test miejsc w `StrategyChecks`; w teście Hali Badawczej saldo startowe 14 800 → 11 800 (tylko z powodu nowej ceny), asercja „badania wolniejsze od pras” zastąpiona „nie później niż +3 tury”, `VALIDATION.md`.
+Sprawdzono: CoreRunner (2139 + 213 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: wygląd licznika miejsc w Unity; badania wygrywają tylko remisem z prasami (49 vs 49, seed 3: 51), więc badania nie opłacają się bardziej niż prasy; opis technologii w UI nie wspomina o dodatkowym miejscu; `STRATEGIC_DESIGN.md` nie wymienia Hali Badawczej (bez zmian); A10 nadal czeka na U01.

@@ -77,3 +77,9 @@ Wygrana (saldo ≥ 35 000 C), seedy 1–6, do 100 tur:
 | Badania | 85 |
 
 Wnioski i ograniczenia: najlepsza strategia wygrywa w 40–60 turach (test), pozostałe wygrywają później. Ekspansja i badania nadal są wolniejsze od pras z rynku — na starcie hala ma tylko 2 miejsca, więc badania dają jedną ulepszoną prasę; tylko wystarczająco tanie, by nie były pułapką. Nie ma strategii dominującej w sensie dowodu, a skrypty są proste. Liczby nie były grane w Unity.
+
+## A13 — szybsza ścieżka rozwoju (10 października 2026)
+
+Zmiany: technologia „Automatyzacja podstawowa” daje +1 miejsce na maszynę w każdej Hali Produkcyjnej (`ProductionSystem.SlotCount`, startowa hala: 2 → 3), Hala Badawcza 4 000 → 1 000 C. Strategia „Badania” w symulacji kupuje teraz Hala Badawcza + Automatyzację i stawia zwykłe prasy w trzecim miejscu (ulepszone prasy i 4 miejsca wypadały gorzej — rynek się nasyca, a ulepszona prasa kosztuje 3 500 C).
+
+Wygrana (saldo ≥ 35 000 C), seedy 1–6: Badania 49 tur (seed 3: 51), prasy z rynku 49, ekspansja 49–77. Test wymaga, by badania wygrywały nie później niż 3 tury po prasach z rynku. Liczby nie były grane w Unity.

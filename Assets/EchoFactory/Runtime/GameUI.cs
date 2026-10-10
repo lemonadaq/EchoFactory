@@ -487,7 +487,7 @@ namespace EchoFactory.Runtime
                 if (parcel.Owned)
                     foreach (var f in state.Facilities)
                         if (f.ParcelId == parcel.Id)
-                            list.Add(new Label("#" + f.Id + "  " + Names.Facility(f.Kind) + " · " + f.Machines.Count + "/" + f.MachineSlots + " maszyn") { name = "facility-row" });
+                            list.Add(new Label("#" + f.Id + "  " + Names.Facility(f.Kind) + " · " + f.Machines.Count + "/" + ProductionSystem.SlotCount(state, f) + " maszyn") { name = "facility-row" });
             }
         }
 
@@ -509,7 +509,7 @@ namespace EchoFactory.Runtime
                         var card = Spawn(listCard, list);
                         if (card == null) break;
                         SetLabel(card, "title", "#" + f.Id + "  " + Names.Facility(f.Kind));
-                        SetLabel(card, "detail", f.Kind == FacilityKind.ResearchHall ? "Odblokowuje drzewo R&D." : "Maszyny: " + f.Machines.Count + "/" + f.MachineSlots + " · dochód: " + f.PassiveIncomePerTurn + "/turę");
+                        SetLabel(card, "detail", f.Kind == FacilityKind.ResearchHall ? "Odblokowuje drzewo R&D." : "Maszyny: " + f.Machines.Count + "/" + ProductionSystem.SlotCount(state, f) + " · dochód: " + f.PassiveIncomePerTurn + "/turę");
                         var action = card.Q<Button>("action");
                         int id = f.Id;
                         if (action != null)
@@ -550,7 +550,7 @@ namespace EchoFactory.Runtime
             var f = FindFacility(selectedFacility);
             if (f == null) { Show(Screen.Facility); return; }
             SetText("lbl-hall-title", "HALA #" + f.Id + "  ·  " + Names.Facility(f.Kind));
-            SetText("lbl-hall-slots", "Sloty: " + f.Machines.Count + " / " + f.MachineSlots);
+            SetText("lbl-hall-slots", "Sloty: " + f.Machines.Count + " / " + ProductionSystem.SlotCount(state, f));
             SetText("lbl-floor-caption", moving ? "PRZESUWANIE · kliknij nowe miejsce" : placing != null ? "USTAWIANIE: " + Names.Machine(placing.Value) + " · kliknij wolne miejsce" : "Kliknij maszynę, aby ją wybrać. Maszyny pracują podczas rozwiązania tury.");
 
             var inputs = Find<VisualElement>("hall-inputs");
@@ -623,7 +623,7 @@ namespace EchoFactory.Runtime
                 }
                 if (shop.childCount == 0) shop.Add(new Label("Ten typ hali nie przyjmuje jeszcze maszyn.") { name = "shop-empty" });
             }
-            SetText("lbl-shop-hint", f.Machines.Count >= f.MachineSlots ? "Brak wolnych slotów w tej hali." : "Wybierz maszynę, potem kliknij wolne miejsce na hali. Szare = brak technologii lub środków.");
+            SetText("lbl-shop-hint", f.Machines.Count >= ProductionSystem.SlotCount(state, f) ? "Brak wolnych slotów w tej hali." : "Wybierz maszynę, potem kliknij wolne miejsce na hali. Szare = brak technologii lub środków.");
             bool planning = state.Phase == StrategicPhase.Planning;
             var move = Find<Button>("btn-machine-move");
             if (move != null) { move.text = moving ? "KLIKNIJ NOWE MIEJSCE" : "PRZESUŃ"; move.SetEnabled(selected != null && planning); }

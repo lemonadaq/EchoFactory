@@ -4,7 +4,7 @@ namespace EchoFactory.Core
 {
     public static class ResearchSystem
     {
-        public const int ResearchHallPrice = 4000;
+        public const int ResearchHallPrice = 1000;
 
         public static bool BuildResearchHall(StrategicState state, int parcelId)
         {

@@ -85,7 +85,7 @@ namespace EchoFactory.Tests
             }
             else
             {
-                TechnologyKind[] order = { TechnologyKind.BasicAutomation, TechnologyKind.ImprovedPress, TechnologyKind.EnergyEfficiency };
+                TechnologyKind[] order = { TechnologyKind.BasicAutomation };
                 for (int i = 0; i < order.Length; i++)
                     if (!s.HasTechnology(order[i])) { if (s.Credits - ResearchCostOf(s, order[i]) >= 1500) ResearchSystem.UnlockTechnology(s, order[i]); break; }
             }
@@ -94,7 +94,7 @@ namespace EchoFactory.Tests
                 var f = s.Facilities[i];
                 if (f.Kind != FacilityKind.ProductionHall) continue;
                 var kind = s.HasTechnology(TechnologyKind.ImprovedPress) ? MachineKind.ImprovedPress : MachineKind.BasicPress;
-                while (f.Machines.Count < f.MachineSlots && Affordable(s, ProductionSystem.MachineCost(kind), 1500) && ProductionSystem.BuildMachine(s, f.Id, kind)) { }
+                while (f.Machines.Count < ProductionSystem.SlotCount(s, f) && Affordable(s, ProductionSystem.MachineCost(kind), 1500) && ProductionSystem.BuildMachine(s, f.Id, kind)) { }
             }
             FeedAll(s, 30);
         }

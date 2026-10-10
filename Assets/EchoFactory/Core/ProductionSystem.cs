@@ -41,6 +41,13 @@ namespace EchoFactory.Core
             }
         }
 
+        // A13: Basic Automation adds one machine slot to every production hall.
+        public static int SlotCount(StrategicState state, FacilityState facility)
+        {
+            int bonus = facility.Kind == FacilityKind.ProductionHall && state.HasTechnology(TechnologyKind.BasicAutomation) ? 1 : 0;
+            return facility.MachineSlots + bonus;
+        }
+
         public static int GetMachinePrice(MachineKind kind) { return MachineCost(kind); }
 
         public static bool CanBuildMachine(StrategicState state, int facilityId, MachineKind kind)
@@ -50,7 +57,7 @@ namespace EchoFactory.Core
             for (int i=0;i<state.Facilities.Count;i++)
             {
                 var f = state.Facilities[i];
-                if (f.Id != facilityId || !f.Unlocked || f.Machines.Count >= f.MachineSlots) continue;
+                if (f.Id != facilityId || !f.Unlocked || f.Machines.Count >= SlotCount(state, f)) continue;
                 if (!FactoryLayoutSystem.IsMachineAllowed(f.Kind, kind)) return false;
                 return state.Credits >= MachineCost(kind);
             }

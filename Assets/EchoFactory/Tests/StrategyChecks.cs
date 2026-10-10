@@ -31,7 +31,7 @@ namespace EchoFactory.Tests
             Assert(a.Turn==2 && a.Phase==StrategicPhase.Planning,ref assertions);
 
             var strategy=StrategicWorldGenerator.NewGame(77);
-            strategy.Credits=14800;
+            strategy.Credits=11800;
             Assert(ResearchSystem.BuildResearchHall(strategy,0),ref assertions);
             Assert(strategy.Facilities.Count==2,ref assertions);
             Assert(ResearchSystem.UnlockTechnology(strategy,TechnologyKind.BasicAutomation),ref assertions);
@@ -40,6 +40,14 @@ namespace EchoFactory.Tests
             var workshop=strategy.Facilities[strategy.Facilities.Count-1];
             Assert(ProductionSystem.BuildMachine(strategy,workshop.Id,MachineKind.Recycler),ref assertions);
             Assert(strategy.Credits==0,ref assertions);
+
+            var slots=StrategicWorldGenerator.NewGame(3); var slotHall=slots.Facilities[0];
+            Assert(ProductionSystem.SlotCount(slots,slotHall)==2,ref assertions); // A13: no bonus without Basic Automation
+            Assert(ProductionSystem.BuildMachine(slots,slotHall.Id,MachineKind.BasicPress) && !ProductionSystem.BuildMachine(slots,slotHall.Id,MachineKind.BasicPress),ref assertions);
+            slots.Credits=20000;
+            Assert(ResearchSystem.BuildResearchHall(slots,0) && ResearchSystem.UnlockTechnology(slots,TechnologyKind.BasicAutomation),ref assertions);
+            Assert(ProductionSystem.SlotCount(slots,slotHall)==3 && ProductionSystem.BuildMachine(slots,slotHall.Id,MachineKind.BasicPress),ref assertions); // +1 slot in production halls
+            Assert(ProductionSystem.SlotCount(slots,slots.Facilities[1])==0,ref assertions); // research hall gets none
 
             var parcels=StrategicWorldGenerator.NewGame(5);
             var target=parcels.Parcels[1]; parcels.Credits=target.Price;
@@ -227,8 +235,8 @@ namespace EchoFactory.Tests
                 var marketLong=BalanceSimulation.Run(1,seed,100); var growLong=BalanceSimulation.Run(2,seed,100); var researchLong=BalanceSimulation.Run(4,seed,100);
                 if(Environment.GetEnvironmentVariable("ECHO_BALANCE_REPORT")!=null)foreach(var lr in new[]{marketLong,growLong,researchLong})Console.WriteLine("100t seed "+seed+" "+lr.Name+": koniec "+lr.FinalCredits+" C, tur "+lr.Turns+", "+lr.Outcome);
                 Assert(marketLong.Outcome==GameOutcome.Won && marketLong.Turns>=40 && marketLong.Turns<=60,ref assertions); // A12: the best scripted strategy wins in 40-60 turns
-                Assert(growLong.Outcome==GameOutcome.Won && growLong.Turns<=100,ref assertions); // expansion and research are slower but still reach the goal
-                Assert(researchLong.Outcome==GameOutcome.Won && researchLong.Turns>marketLong.Turns && researchLong.Turns<=100,ref assertions);
+                Assert(growLong.Outcome==GameOutcome.Won && growLong.Turns<=100,ref assertions); 
+                Assert(researchLong.Outcome==GameOutcome.Won && researchLong.Turns<=marketLong.Turns+3 && researchLong.Turns>=40,ref assertions);
             }
             var broke=StrategicWorldGenerator.NewGame(1); broke.Credits=1000;
             for(int h=0;h<4;h++)broke.Facilities.Add(new FacilityState{Id=broke.NextFacilityId++,Kind=FacilityKind.Workshop,ParcelId=0,MachineSlots=2});
