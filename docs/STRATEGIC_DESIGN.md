@@ -46,7 +46,7 @@ Current prototype machine roles:
 This is intentionally a **chain model**, not a percentage model. A player can build around energy generation, scrap recovery, logistics or raw-material access, and those choices can reinforce or undermine one another.
 
 ## R&D / technology progression
-The Research Hall is the gate to technology progression. It currently costs **4,000 Credits** and must be built on an owned parcel.
+The Research Hall is the gate to technology progression. It currently costs **1,000 Credits** and must be built on an owned parcel.
 
 Technologies should unlock mechanics, machines, production chains or strategic options. Flat bonuses are allowed only when they support a meaningful mechanical change.
 
@@ -65,6 +65,7 @@ Current prototype tree:
 
 Research costs:
 - Basic Automation — 1,500
+  - Also adds **one machine slot** to every Production Hall (starter hall: 2 → 3 slots).
 - Improved Press — 2,000
 - Advanced Press — 2,500
 - Smart Logistics — 3,000
