@@ -37,6 +37,8 @@ namespace EchoFactory.Runtime
         private MachineKind? placing;
         private bool moving;
         private FactoryGame echoHall;
+        private GameSettings settings;
+        private bool paused;
 
         private static readonly MachineKind[] AllMachines = { MachineKind.BasicPress, MachineKind.ImprovedPress, MachineKind.HighSpeedPress, MachineKind.Recycler, MachineKind.Generator, MachineKind.ElectronicsAssembler };
         private static readonly FacilityKind[] BuildableFacilities = { FacilityKind.ProductionHall, FacilityKind.LogisticsHall, FacilityKind.EnergyHall, FacilityKind.Workshop };
@@ -45,6 +47,8 @@ namespace EchoFactory.Runtime
         private void Awake()
         {
             Application.targetFrameRate = 60;
+            settings = SettingsStore.Load();
+            SettingsStore.Apply(settings);
             EnsureCamera();
             LoadMissingAssets();
 
@@ -59,6 +63,7 @@ namespace EchoFactory.Runtime
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape) && root != null && (echoHall == null || !echoHall.enabled)) TogglePause();
             // UIDocument rebuilds its tree when re-enabled or when the UXML is saved in UI Builder during Play.
             if (document != null && document.rootVisualElement != null && document.rootVisualElement != root)
             {
@@ -127,6 +132,13 @@ namespace EchoFactory.Runtime
             Click("btn-machine-demolish", DemolishSelected);
             Click("btn-build-lab", BuildResearchHall);
             Click("btn-next-turn", NextTurn);
+            Click("btn-pause-resume", () => SetPaused(false));
+            Click("btn-pause-save", () => { SaveGame(); Message("Zapisano grę."); SetPaused(false); });
+            Click("btn-pause-menu", () => { SaveGame(); state = null; paused = false; Show(Screen.Menu); });
+            Click("btn-pause-quit", () => { SaveGame(); Application.Quit(); });
+            Click("btn-volume-down", () => ChangeVolume(-1));
+            Click("btn-volume-up", () => ChangeVolume(1));
+            Click("btn-fullscreen", () => { settings.Fullscreen = !settings.Fullscreen; ApplySettings(); });
             Click("btn-tutorial-next", () => { tutorialStep++; Refresh(); });
             Click("btn-tutorial-skip", () => { tutorialSkipped = true; Refresh(); });
 
@@ -190,6 +202,32 @@ namespace EchoFactory.Runtime
             placing = null;
             Message("Wczytano grę — tura " + state.Turn + ".");
             Show(state.Outcome != GameOutcome.Playing ? Screen.End : state.Phase == StrategicPhase.Summary ? Screen.Summary : Screen.Map);
+        }
+
+        // Esc opens the pause menu during a run; on the menu and end screens there is nothing to pause.
+        private void TogglePause()
+        {
+            if (paused) SetPaused(false);
+            else if (state != null && screen != Screen.Menu && screen != Screen.End) SetPaused(true);
+        }
+
+        private void SetPaused(bool value)
+        {
+            paused = value;
+            Refresh();
+        }
+
+        private void ChangeVolume(int steps)
+        {
+            settings.ChangeVolume(steps);
+            ApplySettings();
+        }
+
+        private void ApplySettings()
+        {
+            SettingsStore.Apply(settings);
+            SettingsStore.Save(settings);
+            Refresh();
         }
 
         private void SaveGame()
@@ -364,6 +402,10 @@ namespace EchoFactory.Runtime
             SetVisible("screen-market", screen == Screen.Market);
             SetVisible("screen-summary", screen == Screen.Summary);
             SetVisible("screen-end", screen == Screen.End);
+            if (state == null) paused = false;
+            SetVisible("pause-overlay", paused);
+            SetText("lbl-volume", settings.VolumePercent + "%");
+            SetText("btn-fullscreen", "PEŁNY EKRAN: " + (settings.Fullscreen ? "TAK" : "NIE"));
             RefreshTutorial();
             if (state == null) return;
 

@@ -206,6 +206,15 @@ namespace EchoFactory.Tests
             tut.Turn=1; tut.Outcome=GameOutcome.Lost;
             Assert(!TutorialSystem.IsActive(tut),ref assertions);
 
+            // A11: settings keep the volume on whole steps within 0-100.
+            var cfg=new GameSettings();
+            Assert(cfg.VolumePercent==80 && cfg.Fullscreen && Math.Abs(cfg.VolumeGain-0.8f)<0.0001f,ref assertions);
+            cfg.ChangeVolume(1); Assert(cfg.VolumePercent==90,ref assertions);
+            cfg.ChangeVolume(5); Assert(cfg.VolumePercent==100,ref assertions);
+            cfg.ChangeVolume(-20); Assert(cfg.VolumePercent==0,ref assertions);
+            cfg.VolumePercent=47; cfg.ChangeVolume(0); Assert(cfg.VolumePercent==50,ref assertions);
+            cfg.VolumePercent=250; Assert(Math.Abs(cfg.VolumeGain-1f)<0.0001f && GameSettings.ClampVolume(-5)==0,ref assertions);
+
             // A09: balance. Three scripted strategies plus a reckless one, 30 and 60 turns, several seeds.
             for(int seed=1;seed<=6;seed++)
             {

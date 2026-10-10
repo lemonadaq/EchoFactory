@@ -68,3 +68,9 @@ Niesprawdzone: wygląd i położenie paska w Unity (może zasłaniać dół ekra
 Zmieniono: `Tests/BalanceSimulation.cs` (4 skryptowane strategie na prawdziwej pętli tur), asercje balansu i scenariusz bankructwa w `StrategyChecks`; liczby: cena produktów 120 → 260 C, `MarketSystem.RecoveryPerTurn` = 3 (było 1; oczekiwane wartości podaży w teście A02 dostosowane do stałej), koszt utrzymania 100 + 100 C na halę (`TurnSystem.OperatingCostPerFacility`; start bez zmian), `STRATEGIC_DESIGN.md`, wyniki w `VALIDATION.md`.
 Sprawdzono: CoreRunner (2139 + 190 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: odczucie balansu w Unity; strategie nie używają badań ani ulepszonych pras; cel 50 000 C nieosiągalny w 60 turach, ekspansja słabsza od pras z rynku (nowe zadanie A12); ceny w UI nie były oglądane.
+
+## 2026-10-10 — A11
+
+Zmieniono: `Core/GameSettings.cs` (głośność 0–100% w krokach 10, pełny ekran), `Runtime/SettingsStore.cs` (PlayerPrefs + zastosowanie `AudioListener.volume`/`Screen.fullScreen`), nakładka pauzy `pause-overlay` (`Game.uxml`, `Game.uss`), obsługa Esc i przycisków w `GameUI.cs`, testy w `StrategyChecks`.
+Sprawdzono: CoreRunner (2139 + 196 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
+Niesprawdzone: działanie Esc, nakładki i przełączania pełnego ekranu w Unity (projekt używa starego Input Managera — `Input.GetKeyDown`); „Wyjdź z gry” nie zatrzymuje Play w edytorze; Esc nie działa w prototypie Hali Echo (ma własne „← MENU GŁÓWNE”); pauza nie wstrzymuje niczego poza interfejsem (gra jest turowa).

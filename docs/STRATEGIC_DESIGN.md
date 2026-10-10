@@ -172,3 +172,7 @@ The next implementation layer should expose the new machine/production model in 
 ## Edycja hali
 
 W fazie planowania maszynę można przesunąć (obowiązuje ta sama reguła minimalnego odstępu co przy stawianiu) albo rozebrać ze zwrotem 50% ceny zakupu.
+
+## Pauza i ustawienia
+
+Esc w trakcie gry (poza menu głównym i ekranem końca) otwiera menu pauzy: wznów, zapisz, menu główne (z zapisem), wyjście. Ustawienia: głośność w krokach 10% i pełny ekran; zapisywane w PlayerPrefs niezależnie od zapisu gry.

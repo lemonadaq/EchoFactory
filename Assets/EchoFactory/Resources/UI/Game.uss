@@ -135,3 +135,10 @@
     padding: 10px 14px; border-width: 1px; border-color: var(--c-accent);
     background-color: rgba(10, 16, 24, 0.94);
 }
+
+/* ---------- Pauza ---------- */
+.pause-overlay {
+    position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center; justify-content: center;
+    background-color: rgba(10, 16, 24, 0.7);
+}
