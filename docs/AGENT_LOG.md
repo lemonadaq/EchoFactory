@@ -86,3 +86,9 @@ Niesprawdzone: odczucie balansu w Unity; opis kosztów w UI (karty badań czytaj
 Zmieniono: `ProductionSystem.SlotCount` (Automatyzacja podstawowa: +1 miejsce w każdej Hali Produkcyjnej; budowa maszyn i UI w `GameUI.cs` używają go zamiast `MachineSlots`), cena Hali Badawczej 4 000 → 1 000 C, strategia „Badania” w `BalanceSimulation` (Automatyzacja + zwykłe prasy), test miejsc w `StrategyChecks`; w teście Hali Badawczej saldo startowe 14 800 → 11 800 (tylko z powodu nowej ceny), asercja „badania wolniejsze od pras” zastąpiona „nie później niż +3 tury”, `VALIDATION.md`.
 Sprawdzono: CoreRunner (2139 + 213 asercji), UnityCompileCheck. Brak otwartych issues z etykietą `agent`.
 Niesprawdzone: wygląd licznika miejsc w Unity; badania wygrywają tylko remisem z prasami (49 vs 49, seed 3: 51), więc badania nie opłacają się bardziej niż prasy; opis technologii w UI nie wspomina o dodatkowym miejscu; `STRATEGIC_DESIGN.md` nie wymienia Hali Badawczej (bez zmian); A10 nadal czeka na U01.
+
+## 2026-10-10 — brak zadania
+
+Zmieniono: tylko ten wpis. Brak otwartych issues z etykietą `agent`; jedyne zadanie Asystenta ze statusem „Do zrobienia” (A10) zależy od U01 (Filip, test w Unity), więc nie spełnia warunku zależności.
+Sprawdzono: lista zadań i issues. Kod bez zmian, testy nie były uruchamiane.
+Niesprawdzone: wszystko z U01/U02/U03 czeka na Filipa.
