@@ -13,6 +13,7 @@ Cel: doprowadzić grę do stanu z sekcji „Definicja grywalnej wersji” w `doc
    - najstarsze kwalifikujące się issue z etykietą `agent`; najpierw dopisz je do `TASKS.md` jako nowe zadanie;
    - pierwsze zadanie w `TASKS.md` ze statusem **Do zrobienia**, gdzie „Kto” = Asystent, a zależności mają status Zrobione albo Potwierdzone.
    Zadanie na więcej niż ok. 400 zmienionych linii podziel na mniejsze w `TASKS.md` i zrób tylko pierwsze.
+   Jeśli żadne zadanie się nie kwalifikuje: zakończ przebieg **bez zmian w plikach i bez commita** (nie dopisuj nic do dziennika).
 4. Wykonaj zadanie:
    - reguły gry tylko w `Assets/EchoFactory/Core` (bez `UnityEngine`), każda reguła z testem w `Assets/EchoFactory/Tests`, uruchamianym przez `Tests/CoreRunner`;
    - interfejs tylko w UI Toolkit: układ w `Assets/EchoFactory/Resources/UI/*.uxml`, wygląd w `Game.uss`, logika w `Runtime/GameUI.cs`; bez nowego IMGUI; nie zmieniaj istniejących atrybutów `name` w UXML bez zmiany w kodzie;

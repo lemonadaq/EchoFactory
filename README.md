@@ -12,6 +12,15 @@ Strategiczna gra o budowaniu systemu produkcji (działki, hale, maszyny, R&D, tu
 4. Po imporcie wybierz **Echo Factory → Otwórz halę** albo otwórz `Assets/EchoFactory/Scenes/Factory.unity`.
 5. Wciśnij **Play**. Pojawi się menu: **NOWA GRA** uruchamia warstwę strategiczną, **PROTOTYP HALI ECHO** uruchamia starszą halę z nagrywaniem Echo.
 
+## Android (telefon / tablet)
+
+1. W Unity Hub: **Installs → 6000.3.18f1 → ⚙ → Add modules → Android Build Support** (zaznacz też *OpenJDK* i *Android SDK & NDK Tools*). Uruchom Unity ponownie.
+2. W Unity: **Echo Factory → Zbuduj APK Android** i wskaż folder. Pierwszy build trwa kilka–kilkanaście minut.
+3. Skopiuj `EchoFactory.apk` na telefon (kabel, Google Drive, e-mail) i otwórz go; Android poprosi o zgodę na instalację z nieznanego źródła.
+   Albo: włącz w telefonie *Opcje programisty → Debugowanie USB*, podłącz kabel i użyj **File → Build Profiles → Android → Build And Run**.
+
+Wygląd na telefonie sprawdzisz bez budowania: w oknie Game przełącz **Game → Simulator** i wybierz model telefonu. Gra działa poziomo; przycisk Wstecz otwiera menu pauzy. Prototyp hali Echo jest na telefonie ukryty (wymaga klawiatury).
+
 ## Jak zmieniać wygląd graficznie
 
 | Co chcesz zmienić | Gdzie |

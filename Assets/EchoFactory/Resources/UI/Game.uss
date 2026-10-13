@@ -142,3 +142,13 @@
     align-items: center; justify-content: center;
     background-color: rgba(10, 16, 24, 0.7);
 }
+
+/* ---------- Telefon / tablet ----------
+   Klasa .mobile jest dodawana do korzenia na Androidzie i iOS.
+   Podgląd bez telefonu: Window > General > Device Simulator. */
+.mobile .btn { min-height: 48px; font-size: 17px; }
+.mobile .small { font-size: 15px; }
+.mobile .body { font-size: 17px; }
+.mobile .top-bar { padding: 6px 12px; }
+.mobile .top-bar__brand { display: none; }
+.mobile .top-bar__stock { font-size: 14px; }
