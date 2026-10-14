@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <!-- Maszyna na hali. Obrazek ustawia klasa .machine--RODZAJ w Game.uss. -->
+    <!-- Maszyna na hali. Obrazek ustawia klasa z rodzajem maszyny w Game.uss (sekcja „Obrazki maszyn”). -->
     <Style src="Game.uss" />
     <ui:VisualElement name="machine" class="machine machine--BasicPress">
         <ui:Label name="label" text="PRASA" class="machine__label" picking-mode="Ignore" />
