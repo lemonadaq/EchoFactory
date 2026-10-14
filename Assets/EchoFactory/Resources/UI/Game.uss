@@ -149,6 +149,7 @@
    Klasa .mobile jest dodawana do korzenia na Androidzie i iOS.
    Podgląd bez telefonu: Window > General > Device Simulator. */
 .mobile .btn { min-height: 48px; font-size: 17px; }
+.mobile .machine { width: 150px; height: 150px; }
 .mobile .small { font-size: 15px; }
 .mobile .body { font-size: 17px; }
 .mobile .top-bar { padding: 6px 12px; }

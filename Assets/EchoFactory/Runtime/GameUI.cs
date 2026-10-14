@@ -36,6 +36,7 @@ namespace EchoFactory.Runtime
         private int selectedMachine = -1;
         private MachineKind? placing;
         private bool moving;
+        private bool demolishArmed;
         private FactoryGame echoHall;
         private GameSettings settings;
         private bool paused;
@@ -136,7 +137,7 @@ namespace EchoFactory.Runtime
             Click("btn-manage-parcel", () => Show(Screen.Facility));
             Click("btn-back-map", () => Show(Screen.Map));
             Click("btn-back-facility", () => { placing = null; moving = false; Show(Screen.Facility); });
-            Click("btn-cancel-place", () => { placing = null; moving = false; Refresh(); });
+            Click("btn-cancel-place", () => { placing = null; moving = false; demolishArmed = false; Refresh(); });
             Click("btn-machine-toggle", ToggleMachine);
             Click("btn-machine-move", StartMoving);
             Click("btn-machine-demolish", DemolishSelected);
@@ -291,6 +292,7 @@ namespace EchoFactory.Runtime
             if (state == null && next != Screen.Menu) next = Screen.Menu;
             screen = next;
             if (screen != Screen.Hall) { placing = null; moving = false; }
+            demolishArmed = false;
             Refresh();
         }
 
@@ -368,6 +370,14 @@ namespace EchoFactory.Runtime
         {
             var m = FindMachine(selectedMachine);
             if (m == null || state.Phase != StrategicPhase.Planning) return;
+            if (!demolishArmed)
+            {
+                demolishArmed = true;
+                Message("Kliknij ROZBIERZ jeszcze raz, aby potwierdzić rozbiórkę.");
+                Refresh();
+                return;
+            }
+            demolishArmed = false;
             int refund = FactoryLayoutSystem.DemolishMachine(state, selectedFacility, selectedMachine);
             if (refund < 0) return;
             Message("Rozebrano: " + Names.Machine(m.Kind) + " (zwrot " + refund + " C).");
@@ -380,6 +390,7 @@ namespace EchoFactory.Runtime
         {
             var m = FindMachine(selectedMachine);
             if (m == null || state.Phase != StrategicPhase.Planning) return;
+            demolishArmed = false;
             m.Enabled = !m.Enabled;
             Message(Names.Machine(m.Kind) + (m.Enabled ? " włączona." : " wyłączona."));
             Refresh();
@@ -622,7 +633,7 @@ namespace EchoFactory.Runtime
                     body.EnableInClassList("machine--disabled", !m.Enabled);
                     SetLabel(token, "label", Names.MachineShort(m.Kind));
                     int id = m.Id;
-                    body.RegisterCallback<ClickEvent>(e => { selectedMachine = id; placing = null; moving = false; e.StopPropagation(); Refresh(); });
+                    RegisterMachineDrag(body, token, floor, id);
                 }
             }
 
@@ -660,8 +671,56 @@ namespace EchoFactory.Runtime
             var move = Find<Button>("btn-machine-move");
             if (move != null) { move.text = moving ? "KLIKNIJ NOWE MIEJSCE" : "PRZESUŃ"; move.SetEnabled(selected != null && planning); }
             var demolish = Find<Button>("btn-machine-demolish");
-            if (demolish != null) { demolish.text = selected == null ? "ROZBIERZ" : "ROZBIERZ · zwrot " + FactoryLayoutSystem.GetRefund(selected.Kind) + " C"; demolish.SetEnabled(selected != null && planning); }
+            if (demolish != null) { demolish.text = selected == null ? "ROZBIERZ" : (demolishArmed ? "POTWIERDŹ · zwrot " : "ROZBIERZ · zwrot ") + FactoryLayoutSystem.GetRefund(selected.Kind) + " C"; demolish.SetEnabled(selected != null && planning); }
             SetVisible("btn-cancel-place", placing != null || moving);
+        }
+
+        // Mouse and touch: press selects, dragging a machine in the planning phase moves it.
+        private void RegisterMachineDrag(VisualElement body, VisualElement token, VisualElement floor, int id)
+        {
+            int pointer = -1;
+            Vector2 start = Vector2.zero;
+            bool dragged = false;
+            body.RegisterCallback<PointerDownEvent>(e =>
+            {
+                if (pointer >= 0) return;
+                pointer = e.pointerId;
+                start = (Vector2)e.position;
+                dragged = false;
+                body.CapturePointer(pointer);
+                e.StopPropagation();
+            });
+            body.RegisterCallback<PointerMoveEvent>(e =>
+            {
+                if (e.pointerId != pointer || state == null || state.Phase != StrategicPhase.Planning) return;
+                if (!dragged && Vector2.Distance((Vector2)e.position, start) < 12f) return;
+                float w = floor.resolvedStyle.width, h = floor.resolvedStyle.height;
+                if (w <= 0 || h <= 0) return;
+                dragged = true;
+                Vector2 local = floor.WorldToLocal(e.position);
+                token.style.left = Length.Percent(Mathf.Clamp01(local.x / w) * 100f);
+                token.style.top = Length.Percent(Mathf.Clamp01(local.y / h) * 100f);
+            });
+            body.RegisterCallback<PointerUpEvent>(e =>
+            {
+                if (e.pointerId != pointer) return;
+                body.ReleasePointer(pointer);
+                pointer = -1;
+                e.StopPropagation();
+                if (dragged && state != null && state.Phase == StrategicPhase.Planning)
+                {
+                    float w = floor.resolvedStyle.width, h = floor.resolvedStyle.height;
+                    Vector2 local = floor.WorldToLocal(e.position);
+                    if (w > 0 && h > 0 && FactoryLayoutSystem.MoveMachine(state, selectedFacility, id, Mathf.Clamp01(local.x / w), Mathf.Clamp01(local.y / h)))
+                        Message("Przesunięto maszynę.");
+                    else Message("Tu nie można przesunąć maszyny — za blisko innej.", true);
+                    selectedMachine = id;
+                }
+                else selectedMachine = id;
+                placing = null; moving = false; demolishArmed = false;
+                Refresh();
+            });
+            body.RegisterCallback<PointerCaptureOutEvent>(e => { pointer = -1; });
         }
 
         private void AddResource(VisualElement parent, ResourceKind kind)

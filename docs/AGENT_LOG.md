@@ -170,3 +170,9 @@ Niesprawdzone: wszystko z U01/U02/U03 czeka na Filipa.
 Zmieniono: `Game.uxml` (ekrany w `ScrollView` `screen-scroll`), `Game.uss` (min-height hali, reguły `.mobile`: czcionki ≥ 18 px, zawijany pasek górny, kolumnowy układ paneli, pełna szerokość hali i panelu bocznego). Bez zmian w kodzie ani w nazwach elementów.
 Sprawdzono: `CoreRunner` i `UnityCompileCheck` przechodzą.
 Niesprawdzone: wygląd w Device Simulator (brak Unity); elementy z inline `width` w UXML mogą nie zmieścić się na wąskim ekranie.
+
+## 2026-10-14 — M02 sterowanie dotykiem w hali
+
+Zmieniono: `GameUI.cs` (przeciąganie maszyny przez zdarzenia wskaźnika z `MoveMachine`, krótkie dotknięcie zaznacza; dwuetapowa rozbiórka z napisem POTWIERDŹ), `Game.uss` (maszyny 150 px w `.mobile`). Reguły Core bez zmian.
+Sprawdzono: `CoreRunner` i `UnityCompileCheck` przechodzą.
+Niesprawdzone: przeciąganie myszą i palcem w Unity / Device Simulator (brak Unity), zachowanie przechwytu wskaźnika przy odświeżaniu hali.
