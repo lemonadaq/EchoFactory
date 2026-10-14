@@ -36,6 +36,7 @@
                 <ui:Button name="btn-open-pause" text="MENU" class="btn" />
             </ui:VisualElement>
 
+            <ui:ScrollView name="screen-scroll" class="screen-scroll" mode="Vertical">
             <!-- Mapa -->
             <ui:VisualElement name="screen-map" class="screen row" style="align-items: flex-start;">
                 <ui:VisualElement>
@@ -146,6 +147,7 @@
                     <ui:Button name="btn-end-menu" text="MENU GŁÓWNE" class="btn btn--primary" style="width: 330px; height: 55px; margin-top: 30px;" />
                 </ui:VisualElement>
             </ui:VisualElement>
+            </ui:ScrollView>
         </ui:VisualElement>
 
         <ui:VisualElement name="tutorial-bar" class="tutorial-bar">

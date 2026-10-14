@@ -164,3 +164,9 @@ Niesprawdzone: wszystko z U01/U02/U03 czeka na Filipa.
 Zmieniono: tylko ten wpis. Brak otwartych issues z etykietą `agent`; jedyne zadanie Asystenta ze statusem „Do zrobienia” (A10) zależy od U01 (Filip, test w Unity), więc nie spełnia warunku zależności.
 Sprawdzono: lista zadań i issues. Kod bez zmian, testy nie były uruchamiane.
 Niesprawdzone: wszystko z U01/U02/U03 czeka na Filipa.
+
+## 2026-10-14 — M01 układ na telefon
+
+Zmieniono: `Game.uxml` (ekrany w `ScrollView` `screen-scroll`), `Game.uss` (min-height hali, reguły `.mobile`: czcionki ≥ 18 px, zawijany pasek górny, kolumnowy układ paneli, pełna szerokość hali i panelu bocznego). Bez zmian w kodzie ani w nazwach elementów.
+Sprawdzono: `CoreRunner` i `UnityCompileCheck` przechodzą.
+Niesprawdzone: wygląd w Device Simulator (brak Unity); elementy z inline `width` w UXML mogą nie zmieścić się na wąskim ekranie.

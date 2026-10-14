@@ -45,6 +45,8 @@
     border-width: 1px; border-color: #D9DDD7; margin: 6px;
 }
 .screen { flex-grow: 1; padding: 20px 30px; }
+.screen-scroll { flex-grow: 1; }
+.screen-scroll > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container { flex-grow: 1; }
 .row { flex-direction: row; align-items: center; }
 .col { flex-direction: column; }
 .grow { flex-grow: 1; }
@@ -89,7 +91,7 @@
 
 .hall-floor {
     flex-grow: 1; margin: 0 18px; border-width: 3px; border-color: var(--c-line); border-radius: 6px;
-    background-color: #F4F5F1;
+    background-color: #F4F5F1; min-height: 420px;
 }
 .hall-floor--placing { border-color: var(--c-accent); background-color: #E8F2F0; }
 .hall-floor__caption { position: absolute; left: 16px; top: 10px; }
@@ -152,3 +154,34 @@
 .mobile .top-bar { padding: 6px 12px; }
 .mobile .top-bar__brand { display: none; }
 .mobile .top-bar__stock { font-size: 14px; }
+
+/* Zawijanie i stos paneli, gdy brakuje szerokości (telefon). */
+.mobile .btn { margin: 3px; }
+.mobile .h2 { font-size: 20px; }
+.mobile .h1 { font-size: 28px; }
+.mobile .small { font-size: 18px; }
+.mobile .body { font-size: 18px; }
+.mobile .btn, .mobile .top-bar__stock { font-size: 18px; }
+.mobile .screen { padding: 12px 16px; }
+.mobile .top-bar { flex-wrap: wrap; }
+.mobile .top-bar__credits { font-size: 22px; margin-left: 8px; margin-right: 8px; }
+.mobile .top-bar .spacer { flex-grow: 0; width: 8px; }
+.mobile .menu { padding-left: 16px; }
+.mobile .menu__card { width: auto; max-width: 760px; }
+.mobile .menu__card .row { flex-wrap: wrap; }
+.mobile .menu__card .btn { width: auto; flex-grow: 1; }
+.mobile .screen.row { flex-direction: column; align-items: stretch; }
+.mobile .screen.row > * { margin-left: 0; margin-right: 0; width: auto; }
+.mobile .parcel-grid { width: auto; }
+.mobile .parcel-card { width: 200px; }
+.mobile #parcel-panel { min-height: 0; margin-left: 0; }
+.mobile .hall-layout { flex-wrap: wrap; }
+.mobile .flow-column { width: 100%; flex-direction: row; flex-wrap: wrap; }
+.mobile .flow-column > .h2 { width: 100%; }
+.mobile .hall-floor { flex-grow: 0; width: 100%; height: 420px; margin: 8px 0; }
+.mobile .side-panel { width: 100%; }
+.mobile #machine-shop { min-height: 220px; }
+.mobile #screen-summary > * { width: auto; }
+.mobile #screen-end > .panel { width: auto; }
+.mobile .tutorial-bar { left: 12px; right: 12px; flex-wrap: wrap; }
+.mobile .pause-overlay .panel { width: 90%; max-width: 460px; }
