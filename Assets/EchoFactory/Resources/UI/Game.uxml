@@ -36,7 +36,7 @@
                 <ui:Button name="btn-open-pause" text="MENU" class="btn" />
             </ui:VisualElement>
 
-            <!-- ---------- Mapa ---------- -->
+            <!-- Mapa -->
             <ui:VisualElement name="screen-map" class="screen row" style="align-items: flex-start;">
                 <ui:VisualElement>
                     <ui:Label text="MAPA PRZEMYSŁOWA" class="h1" />
@@ -55,7 +55,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- ---------- Konstrukcje ---------- -->
+            <!-- Konstrukcje -->
             <ui:VisualElement name="screen-facility" class="screen row" style="align-items: flex-start;">
                 <ui:VisualElement class="grow" style="margin-right: 20px;">
                     <ui:Label name="lbl-facility-title" text="ZARZĄDZANIE · DZIAŁKA 1" class="h1" />
@@ -69,7 +69,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- ---------- Hala (widok produkcji) ---------- -->
+            <!-- Hala (widok produkcji) -->
             <ui:VisualElement name="screen-hall" class="screen">
                 <ui:VisualElement class="row" style="margin-bottom: 10px;">
                     <ui:Label name="lbl-hall-title" text="HALA #1 · HALA PRODUKCYJNA" class="h1 accent" />
@@ -104,7 +104,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- ---------- R&D ---------- -->
+            <!-- R&D -->
             <ui:VisualElement name="screen-research" class="screen row" style="align-items: flex-start;">
                 <ui:VisualElement class="grow">
                     <ui:Label text="R&amp;D · DRZEWO TECHNOLOGII" class="h1" />
@@ -118,14 +118,14 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- ---------- Rynek ---------- -->
+            <!-- Rynek -->
             <ui:VisualElement name="screen-market" class="screen">
                 <ui:Label text="RYNEK" class="h1" />
                 <ui:Label name="lbl-market-hint" text="" class="body" style="margin-bottom: 8px;" />
                 <ui:VisualElement name="market-list" />
             </ui:VisualElement>
 
-            <!-- ---------- Podsumowanie tury ---------- -->
+            <!-- Podsumowanie tury -->
             <ui:VisualElement name="screen-summary" class="screen row" style="align-items: flex-start;">
                 <ui:VisualElement class="panel" style="width: 760px;">
                     <ui:Label name="lbl-summary-title" text="PODSUMOWANIE TURY 1" class="h1" />
@@ -138,7 +138,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- ---------- Koniec gry ---------- -->
+            <!-- Koniec gry -->
             <ui:VisualElement name="screen-end" class="screen">
                 <ui:VisualElement class="panel" style="width: 760px;">
                     <ui:Label name="lbl-end-title" text="" class="title" />

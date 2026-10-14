@@ -56,6 +56,14 @@
     <UnityOptionalModule Include="UnityEngine.UnityAnalyticsModule" Package="com.unity.modules.unityanalytics" />
     <UnityOptionalModule Include="UnityEngine.VFXModule" Package="com.unity.modules.vfx" />
   </ItemGroup>
+  <!-- Unity's UXML importer rejects malformed XML (e.g. a double dash inside a comment); fail here first. -->
+  <ItemGroup>
+    <UnityXml Include="../../Assets/**/*.uxml" />
+  </ItemGroup>
+  <Target Name="ValidateUxml" BeforeTargets="CoreCompile" Inputs="@(UnityXml)" Outputs="$(IntermediateOutputPath)uxml.ok">
+    <XmlPeek XmlInputPath="%(UnityXml.FullPath)" Query="/*/@editor-extension-mode" />
+    <Touch Files="$(IntermediateOutputPath)uxml.ok" AlwaysCreate="true" />
+  </Target>
   <Target Name="DropDisabledUnityModules" AfterTargets="ResolveAssemblyReferences">
     <PropertyGroup>
       <UnityManifest>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../Packages/manifest.json'))</UnityManifest>
