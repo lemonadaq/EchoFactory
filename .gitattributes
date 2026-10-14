@@ -6,3 +6,4 @@
 *.meta text eol=lf
 *.unity text eol=lf
 *.asset text eol=lf
+*.bat text eol=crlf

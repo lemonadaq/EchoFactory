@@ -19,9 +19,26 @@ if errorlevel 1 (
     exit /b 1
 )
 
+rem Lokalne zmiany (np. pliki skopiowane z ZIP albo przestawione przez Unity) blokuja git pull.
+rem Odkladamy je do schowka git stash, zamiast kasowac - zawsze mozna je odzyskac.
+set DIRTY=
+for /f "delims=" %%i in ('git status --porcelain') do set DIRTY=1
+if defined DIRTY (
+    echo Znaleziono lokalne zmiany. Odkladam je do schowka ^(git stash^), nic nie jest kasowane.
+    echo Zamknij Unity przed aktualizacja.
+    git stash push --include-untracked -m "UPDATE.bat kopia %DATE% %TIME%"
+    if errorlevel 1 (
+        echo BLAD: nie udalo sie odlozyc lokalnych zmian.
+        pause
+        exit /b 1
+    )
+    echo Kopia zapisana. Lista kopii: git stash list
+    echo.
+)
+
 echo Sprawdzanie zmian na GitHubie...
 echo.
-git pull
+git pull --ff-only
 
 if errorlevel 1 (
     echo.
