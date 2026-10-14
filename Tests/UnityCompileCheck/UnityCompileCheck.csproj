@@ -18,4 +18,57 @@
   <ItemGroup>
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2021.3.29.1" />
   </ItemGroup>
+  <!-- Unity compiles against built-in modules only when they are enabled in Packages/manifest.json.
+       Drop the reference assemblies of disabled modules so a missing module fails here too
+       (e.g. AudioListener without com.unity.modules.audio). -->
+  <ItemGroup>
+    <UnityOptionalModule Include="UnityEngine.AudioModule" Package="com.unity.modules.audio" />
+    <UnityOptionalModule Include="UnityEngine.PhysicsModule" Package="com.unity.modules.physics" />
+    <UnityOptionalModule Include="UnityEngine.Physics2DModule" Package="com.unity.modules.physics2d" />
+    <UnityOptionalModule Include="UnityEngine.AnimationModule" Package="com.unity.modules.animation" />
+    <UnityOptionalModule Include="UnityEngine.AIModule" Package="com.unity.modules.ai" />
+    <UnityOptionalModule Include="UnityEngine.ParticleSystemModule" Package="com.unity.modules.particlesystem" />
+    <UnityOptionalModule Include="UnityEngine.UnityWebRequestModule" Package="com.unity.modules.unitywebrequest" />
+    <UnityOptionalModule Include="UnityEngine.UnityWebRequestTextureModule" Package="com.unity.modules.unitywebrequesttexture" />
+    <UnityOptionalModule Include="UnityEngine.UnityWebRequestAudioModule" Package="com.unity.modules.unitywebrequestaudio" />
+    <UnityOptionalModule Include="UnityEngine.UnityWebRequestAssetBundleModule" Package="com.unity.modules.unitywebrequestassetbundle" />
+    <UnityOptionalModule Include="UnityEngine.UnityWebRequestWWWModule" Package="com.unity.modules.unitywebrequestwww" />
+    <UnityOptionalModule Include="UnityEngine.VideoModule" Package="com.unity.modules.video" />
+    <UnityOptionalModule Include="UnityEngine.TerrainModule" Package="com.unity.modules.terrain" />
+    <UnityOptionalModule Include="UnityEngine.TerrainPhysicsModule" Package="com.unity.modules.terrainphysics" />
+    <UnityOptionalModule Include="UnityEngine.TilemapModule" Package="com.unity.modules.tilemap" />
+    <UnityOptionalModule Include="UnityEngine.ClothModule" Package="com.unity.modules.cloth" />
+    <UnityOptionalModule Include="UnityEngine.VehiclesModule" Package="com.unity.modules.vehicles" />
+    <UnityOptionalModule Include="UnityEngine.WindModule" Package="com.unity.modules.wind" />
+    <UnityOptionalModule Include="UnityEngine.ImageConversionModule" Package="com.unity.modules.imageconversion" />
+    <UnityOptionalModule Include="UnityEngine.ScreenCaptureModule" Package="com.unity.modules.screencapture" />
+    <UnityOptionalModule Include="UnityEngine.AssetBundleModule" Package="com.unity.modules.assetbundle" />
+    <UnityOptionalModule Include="UnityEngine.DirectorModule" Package="com.unity.modules.director" />
+    <UnityOptionalModule Include="UnityEngine.UmbraModule" Package="com.unity.modules.umbra" />
+    <UnityOptionalModule Include="UnityEngine.AndroidJNIModule" Package="com.unity.modules.androidjni" />
+    <UnityOptionalModule Include="UnityEngine.VRModule" Package="com.unity.modules.vr" />
+    <UnityOptionalModule Include="UnityEngine.XRModule" Package="com.unity.modules.xr" />
+    <UnityOptionalModule Include="UnityEngine.UIModule" Package="com.unity.modules.ui" />
+    <UnityOptionalModule Include="UnityEngine.UIElementsModule" Package="com.unity.modules.uielements" />
+    <UnityOptionalModule Include="UnityEngine.IMGUIModule" Package="com.unity.modules.imgui" />
+    <UnityOptionalModule Include="UnityEngine.JSONSerializeModule" Package="com.unity.modules.jsonserialize" />
+    <UnityOptionalModule Include="UnityEngine.AccessibilityModule" Package="com.unity.modules.accessibility" />
+    <UnityOptionalModule Include="UnityEngine.UnityAnalyticsModule" Package="com.unity.modules.unityanalytics" />
+    <UnityOptionalModule Include="UnityEngine.VFXModule" Package="com.unity.modules.vfx" />
+  </ItemGroup>
+  <Target Name="DropDisabledUnityModules" AfterTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <UnityManifest>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../Packages/manifest.json'))</UnityManifest>
+    </PropertyGroup>
+    <ItemGroup>
+      <_DisabledUnityModule Include="@(UnityOptionalModule)" Condition="!$(UnityManifest.Contains('&quot;%(UnityOptionalModule.Package)&quot;'))" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_DisabledUnityModules>;@(_DisabledUnityModule);</_DisabledUnityModules>
+    </PropertyGroup>
+    <ItemGroup>
+      <ReferencePath Remove="@(ReferencePath)" Condition="$(_DisabledUnityModules.Contains(';%(Filename);'))" />
+    </ItemGroup>
+    <Message Importance="high" Text="Wyłączone moduły Unity (bez referencji): @(_DisabledUnityModule)" />
+  </Target>
 </Project>
