@@ -39,6 +39,8 @@ namespace EchoFactory.Runtime
         private FactoryGame echoHall;
         private GameSettings settings;
         private bool paused;
+        // Phones and tablets: touch layout, safe area, no keyboard-only screens.
+        private static bool Mobile { get { return Application.isMobilePlatform; } }
 
         private static readonly MachineKind[] AllMachines = { MachineKind.BasicPress, MachineKind.ImprovedPress, MachineKind.HighSpeedPress, MachineKind.Recycler, MachineKind.Generator, MachineKind.ElectronicsAssembler };
         private static readonly FacilityKind[] BuildableFacilities = { FacilityKind.ProductionHall, FacilityKind.LogisticsHall, FacilityKind.EnergyHall, FacilityKind.Workshop };
@@ -102,7 +104,8 @@ namespace EchoFactory.Runtime
                 panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
                 panelSettings.referenceResolution = new Vector2Int(1440, 900);
                 panelSettings.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
-                panelSettings.match = 0.5f;
+                // On phones the screen is much wider than 16:10, so fit the height and let rows use the extra width.
+                panelSettings.match = Mobile ? 1f : 0.5f;
             }
         }
 
@@ -112,6 +115,13 @@ namespace EchoFactory.Runtime
         {
             root = document.rootVisualElement;
             root.style.flexGrow = 1;
+            root.EnableInClassList("mobile", Mobile);
+            if (Mobile)
+            {
+                root.RegisterCallback<GeometryChangedEvent>(_ => ApplySafeArea());
+                SetVisible("btn-echo-hall", false);   // keyboard-driven IMGUI prototype
+                SetVisible("btn-fullscreen", false);  // always fullscreen on mobile
+            }
 
             Click("btn-new-game", NewGame);
             Click("btn-continue", Continue);
@@ -132,6 +142,7 @@ namespace EchoFactory.Runtime
             Click("btn-machine-demolish", DemolishSelected);
             Click("btn-build-lab", BuildResearchHall);
             Click("btn-next-turn", NextTurn);
+            Click("btn-open-pause", TogglePause);
             Click("btn-pause-resume", () => SetPaused(false));
             Click("btn-pause-save", () => { SaveGame(); Message("Zapisano grę."); SetPaused(false); });
             Click("btn-pause-menu", () => { SaveGame(); state = null; paused = false; Show(Screen.Menu); });
@@ -154,7 +165,7 @@ namespace EchoFactory.Runtime
         }
 
         private T Find<T>(string name) where T : VisualElement { return root == null ? null : root.Q<T>(name); }
-        private void SetText(string name, string text) { var l = Find<Label>(name); if (l != null) l.text = text; }
+        private void SetText(string name, string text) { var l = Find<TextElement>(name); if (l != null) l.text = text; }
         private static void SetVisible(VisualElement e, bool visible) { if (e != null) e.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None; }
         private void SetVisible(string name, bool visible) { SetVisible(Find<VisualElement>(name), visible); }
         private void SetEnabled(string name, bool enabled) { var e = Find<VisualElement>(name); if (e != null) e.SetEnabled(enabled); }
@@ -228,6 +239,27 @@ namespace EchoFactory.Runtime
             SettingsStore.Apply(settings);
             SettingsStore.Save(settings);
             Refresh();
+        }
+
+        private void OnApplicationPause(bool pausing)
+        {
+            // Android may kill a backgrounded app without warning, so keep the save current.
+            if (pausing && state != null) SaveGame();
+        }
+
+        /// <summary>Keeps buttons out of notches and rounded corners (Screen.safeArea is in screen pixels).</summary>
+        private void ApplySafeArea()
+        {
+            if (root == null || UnityEngine.Screen.width <= 0 || UnityEngine.Screen.height <= 0) return;
+            Rect safe = UnityEngine.Screen.safeArea;
+            float sx = root.resolvedStyle.width / UnityEngine.Screen.width, sy = root.resolvedStyle.height / UnityEngine.Screen.height;
+            if (float.IsNaN(sx) || float.IsNaN(sy)) return;
+            float left = safe.xMin * sx, right = (UnityEngine.Screen.width - safe.xMax) * sx;
+            float top = (UnityEngine.Screen.height - safe.yMax) * sy, bottom = safe.yMin * sy;
+            if (Mathf.Approximately(root.resolvedStyle.paddingLeft, left) && Mathf.Approximately(root.resolvedStyle.paddingRight, right) &&
+                Mathf.Approximately(root.resolvedStyle.paddingTop, top) && Mathf.Approximately(root.resolvedStyle.paddingBottom, bottom)) return;
+            root.style.paddingLeft = left; root.style.paddingRight = right;
+            root.style.paddingTop = top; root.style.paddingBottom = bottom;
         }
 
         private void SaveGame()

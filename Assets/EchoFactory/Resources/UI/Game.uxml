@@ -33,6 +33,7 @@
                 <ui:Label name="lbl-credits" text="10000 C" class="top-bar__credits" />
                 <ui:Label name="lbl-stock" text="STAL 0 | EN 0 | ZŁOM 0" class="top-bar__stock" />
                 <ui:Button name="btn-end-turn" text="ZAKOŃCZ TURĘ" class="btn btn--primary" style="width: 180px;" />
+                <ui:Button name="btn-open-pause" text="MENU" class="btn" />
             </ui:VisualElement>
 
             <!-- ---------- Mapa ---------- -->
